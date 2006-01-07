@@ -1,4 +1,4 @@
-# $Id: 4chan.pl,v 1.1 2006-01-07 19:27:56 mitch Exp $
+# $Id: 4chan.pl,v 1.2 2006-01-07 19:43:15 mitch Exp $
 #
 # autodownload 4chan links before they dissappear
 #
@@ -10,13 +10,13 @@
 # based on trigger.pl by Wouter Coekaerts <wouter@coekaerts.be>
 
 use strict;
-use Irssi 20020324 qw (command_bind command_runsub command signal_add_first signal_continue signal_stop);
+use Irssi 20020324 qw (command_bind signal_add_first signal_add_last);
 use IO::File;
 use vars qw($VERSION %IRSSI);
 use POSIX qw(strftime);
 
-my $CVSVERSION = do { my @r = (q$Revision: 1.1 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
-my $CVSDATE = (split(/ /, '$Date: 2006-01-07 19:27:56 $'))[1];
+my $CVSVERSION = do { my @r = (q$Revision: 1.2 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+my $CVSDATE = (split(/ /, '$Date: 2006-01-07 19:43:15 $'))[1];
 $VERSION = $CVSVERSION;
 %IRSSI = (
 	authors  	=> 'Christian Garbs',
@@ -35,20 +35,22 @@ set 4chan_downdir to your desired download directory
 
 SCRIPTHELP_EOF
    ,MSGLEVEL_CLIENTCRAP);
-} # /
+}
 
 
 # "message public", SERVER_REC, char *msg, char *nick, char *address, char *target
-signal_add_first("message public" => sub {check_signal_message(\@_,1,4,2,3,'publics');});
+signal_add_last("message public" => sub {check_for_link(\@_,1,4,2,0);});
 # "message private", SERVER_REC, char *msg, char *nick, char *address
-signal_add_first("message private" => sub {check_signal_message(\@_,1,-1,2,3,'privmsgs');});
+signal_add_last("message private" => sub {check_for_link(\@_,1,-1,2,0);});
 
 ## TODO: check for own lines, too!
+# "send text", char *line, SERVER_REC, WI_ITEM_REC
+#signal_add_last("send text" => sub{check_for_link(\@,0,-1,-1
 
-sub check_signal_message {
-    my ($signal,$parammessage,$paramchannel,$paramnick,$paramaddress,$condition) = @_;
-    my $server = $signal->[0];
-    my $target = $signal->[4];
+sub check_for_link {
+    my ($signal,$parammessage,$paramchannel,$paramnick,$paramserver) = @_;
+    my $server = $signal->[$paramserver];
+    my $target = $signal->[$paramchannel];
     my $message = ($parammessage == -1) ? '' : $signal->[$parammessage];
     
 
@@ -59,6 +61,7 @@ sub check_signal_message {
 	$witem = Irssi::window_item_find($target);
     }
 
+   
     if ($message =~ m|(http://[a-z]+\.4chan[a-z]*\.org/([a-z]+)/src/(\d+.[a-z]+))|) {
 	my $now = strftime "%d.%m.%Y %H:%M:%S", localtime;
 	my $url = $1;
