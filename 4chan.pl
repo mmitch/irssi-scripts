@@ -1,4 +1,4 @@
-# $Id: 4chan.pl,v 1.2 2006-01-07 19:43:15 mitch Exp $
+# $Id: 4chan.pl,v 1.3 2006-01-18 20:24:20 mitch Exp $
 #
 # autodownload 4chan links before they dissappear
 #
@@ -15,8 +15,8 @@ use IO::File;
 use vars qw($VERSION %IRSSI);
 use POSIX qw(strftime);
 
-my $CVSVERSION = do { my @r = (q$Revision: 1.2 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
-my $CVSDATE = (split(/ /, '$Date: 2006-01-07 19:43:15 $'))[1];
+my $CVSVERSION = do { my @r = (q$Revision: 1.3 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+my $CVSDATE = (split(/ /, '$Date: 2006-01-18 20:24:20 $'))[1];
 $VERSION = $CVSVERSION;
 %IRSSI = (
 	authors  	=> 'Christian Garbs',
@@ -42,10 +42,10 @@ SCRIPTHELP_EOF
 signal_add_last("message public" => sub {check_for_link(\@_,1,4,2,0);});
 # "message private", SERVER_REC, char *msg, char *nick, char *address
 signal_add_last("message private" => sub {check_for_link(\@_,1,-1,2,0);});
-
-## TODO: check for own lines, too!
-# "send text", char *line, SERVER_REC, WI_ITEM_REC
-#signal_add_last("send text" => sub{check_for_link(\@,0,-1,-1
+# "message own_public", SERVER_REC, char *msg, char *target
+signal_add_last("message own_public" => sub {check_for_link(\@_,1,2,-1,0);});
+# "message own_private", SERVER_REC, char *msg, char *target, char *orig_target
+signal_add_last("message own_private" => sub {check_for_link(\@_,1,2,-1,0);});
 
 sub check_for_link {
     my ($signal,$parammessage,$paramchannel,$paramnick,$paramserver) = @_;
@@ -69,7 +69,7 @@ sub check_for_link {
 	my $file = $3;
 	
 	my $channel = ($paramchannel == -1) ? '-private-' : $signal->[$paramchannel];
-	my $nick = ($paramnick == -1) ? '-unknown-' : $signal->[$paramnick];
+	my $nick = ($paramnick == -1) ? '*self*' : $signal->[$paramnick];
 	
 	my $filename = Irssi::settings_get_str('4chan_downdir') . "/$file";
 	my $io = new IO::File "$filename.idx", "a";
