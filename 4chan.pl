@@ -1,4 +1,4 @@
-# $Id: 4chan.pl,v 1.4 2006-01-18 20:33:54 mitch Exp $
+# $Id: 4chan.pl,v 1.5 2006-03-26 19:44:59 mitch Exp $
 #
 # autodownload 4chan links before they dissappear
 #
@@ -15,8 +15,8 @@ use IO::File;
 use vars qw($VERSION %IRSSI);
 use POSIX qw(strftime);
 
-my $CVSVERSION = do { my @r = (q$Revision: 1.4 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
-my $CVSDATE = (split(/ /, '$Date: 2006-01-18 20:33:54 $'))[1];
+my $CVSVERSION = do { my @r = (q$Revision: 1.5 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+my $CVSDATE = (split(/ /, '$Date: 2006-03-26 19:44:59 $'))[1];
 $VERSION = $CVSVERSION;
 %IRSSI = (
 	authors  	=> 'Christian Garbs',
@@ -28,16 +28,29 @@ $VERSION = $CVSVERSION;
 	changed  	=> $CVSDATE,
 );
 
+## TODO help does not work
 sub cmd_help {
 	Irssi::print ( <<SCRIPTHELP_EOF
 
 set 4chan_downdir to your desired download directory
+set 4chan_verbose to show link aquisition
+set 4chan_ut to send comments on link sprees
 
 SCRIPTHELP_EOF
    ,MSGLEVEL_CLIENTCRAP);
 }
 
-
+my ($last_nick, $spree_count);
+my %spree_text = (
+    3 => 'NICK: Hat Trick',
+    5 => 'NICK is on a linking spree',
+    7 => 'NICK is on a rampage',
+   10 => 'NICK is dominating',
+   13 => 'NICK is unstoppable',
+   16 => 'NICK is godlike',
+   20 => 'NICK: WICKED SICK!',
+   );
+    
 # "message public", SERVER_REC, char *msg, char *nick, char *address, char *target
 signal_add_last("message public" => sub {check_for_link(\@_,1,4,2,0);});
 # "message own_public", SERVER_REC, char *msg, char *target
@@ -76,8 +89,32 @@ sub check_for_link {
 	my $file = $3;
 	
 	my $channel = ($paramchannel == -1) ? '-private-' : $signal->[$paramchannel];
+	## TODO use current nick instead of '*self*'
 	my $nick = ($paramnick == -1) ? '*self*' : $signal->[$paramnick];
 	
+	# linking sprees
+	if ($last_nick eq $nick) {
+	    $spree_count++;
+	} else {
+	    $spree_count = 1;
+	    $last_nick = $nick;
+	}
+	if (exists $spree_text{$spree_count}) {
+	    my $text = $spree_text{$spree_count};
+	    $text =~ s/NICK/$nick/g;
+	    if (! ($text =~ s|\*self\*.\s*|/me |)) {
+		$text = "/SAY $text";
+	    }
+	    my $context;
+	    if ($paramchannel!=-1 && $server->channel_find($signal->[$paramchannel])) {
+		$context = $server->channel_find($signal->[$paramchannel]);
+	    } else {
+		$context = $server;
+	    }
+	    $context->command("$text");
+	}
+
+	# write log and download
 	my $filename = Irssi::settings_get_str('4chan_downdir') . "/$file";
 	my $io = new IO::File "$filename.idx", "a";
 	if (defined $io) {
@@ -89,11 +126,13 @@ sub check_for_link {
 	    $io->print("TIME\t$now\n");
 	    $io->close;
 	    system("GET \"$url\" > \"$filename\" &");
+
 	    if (defined $witem) {
-		$witem->print("Saved 4chan link", MSGLEVEL_CLIENTCRAP);
+		$witem->print("%R>>%n Saved 4chan link", MSGLEVEL_CLIENTCRAP);
 	    } else {
-		Irssi::print("Saved 4chan $filename");
+		Irssi::print("%R>>%n Saved 4chan $filename");
 	    }
+
 	}
 
     }
