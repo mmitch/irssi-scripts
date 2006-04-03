@@ -1,4 +1,4 @@
-# $Id: 4chan.pl,v 1.5 2006-03-26 19:44:59 mitch Exp $
+# $Id: 4chan.pl,v 1.6 2006-04-03 21:13:01 mitch Exp $
 #
 # autodownload 4chan links before they dissappear
 #
@@ -15,8 +15,8 @@ use IO::File;
 use vars qw($VERSION %IRSSI);
 use POSIX qw(strftime);
 
-my $CVSVERSION = do { my @r = (q$Revision: 1.5 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
-my $CVSDATE = (split(/ /, '$Date: 2006-03-26 19:44:59 $'))[1];
+my $CVSVERSION = do { my @r = (q$Revision: 1.6 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+my $CVSDATE = (split(/ /, '$Date: 2006-04-03 21:13:01 $'))[1];
 $VERSION = $CVSVERSION;
 %IRSSI = (
 	authors  	=> 'Christian Garbs',
@@ -42,13 +42,13 @@ SCRIPTHELP_EOF
 
 my ($last_nick, $spree_count);
 my %spree_text = (
-    3 => 'NICK: Hat Trick',
+#    3 => 'NICK: Hat Trick',
     5 => 'NICK is on a linking spree',
-    7 => 'NICK is on a rampage',
-   10 => 'NICK is dominating',
-   13 => 'NICK is unstoppable',
-   16 => 'NICK is godlike',
-   20 => 'NICK: WICKED SICK!',
+   10 => 'NICK is on a rampage',
+   15 => 'NICK is dominating',
+   20 => 'NICK is unstoppable',
+   25 => 'NICK is godlike',
+   30 => 'NICK: WICKED SICK!',
    );
     
 # "message public", SERVER_REC, char *msg, char *nick, char *address, char *target
