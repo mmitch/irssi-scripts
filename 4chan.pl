@@ -1,4 +1,4 @@
-# $Id: 4chan.pl,v 1.6 2006-04-03 21:13:01 mitch Exp $
+# $Id: 4chan.pl,v 1.7 2006-04-08 08:22:07 mitch Exp $
 #
 # autodownload 4chan links before they dissappear
 #
@@ -15,8 +15,8 @@ use IO::File;
 use vars qw($VERSION %IRSSI);
 use POSIX qw(strftime);
 
-my $CVSVERSION = do { my @r = (q$Revision: 1.6 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
-my $CVSDATE = (split(/ /, '$Date: 2006-04-03 21:13:01 $'))[1];
+my $CVSVERSION = do { my @r = (q$Revision: 1.7 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+my $CVSDATE = (split(/ /, '$Date: 2006-04-08 08:22:07 $'))[1];
 $VERSION = $CVSVERSION;
 %IRSSI = (
 	authors  	=> 'Christian Garbs',
@@ -40,7 +40,7 @@ SCRIPTHELP_EOF
    ,MSGLEVEL_CLIENTCRAP);
 }
 
-my ($last_nick, $spree_count);
+my (%last_nick, %spree_count);
 my %spree_text = (
 #    3 => 'NICK: Hat Trick',
     5 => 'NICK is on a linking spree',
@@ -93,14 +93,14 @@ sub check_for_link {
 	my $nick = ($paramnick == -1) ? '*self*' : $signal->[$paramnick];
 	
 	# linking sprees
-	if ($last_nick eq $nick) {
-	    $spree_count++;
+	if ($last_nick{$channel} eq $nick) {
+	    $spree_count{$channel}++;
 	} else {
-	    $spree_count = 1;
-	    $last_nick = $nick;
+	    $spree_count{$channel} = 1;
+	    $last_nick{$channel} = $nick;
 	}
-	if (exists $spree_text{$spree_count}) {
-	    my $text = $spree_text{$spree_count};
+	if (exists $spree_text{$spree_count{$channel}}) {
+	    my $text = $spree_text{$spree_count{$channel}};
 	    $text =~ s/NICK/$nick/g;
 	    if (! ($text =~ s|\*self\*.\s*|/me |)) {
 		$text = "/SAY $text";
