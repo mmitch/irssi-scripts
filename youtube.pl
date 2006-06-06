@@ -1,11 +1,11 @@
-# $Id: youtube.pl,v 1.2 2006-06-05 23:52:50 mitch Exp $
+# $Id: youtube.pl,v 1.3 2006-06-06 00:38:58 mitch Exp $
 #
 # autodownload youtube videos
 #
 # (c) 2006 by Christian Garbs <mitch@cgarbs,de>
 # licensed under GNU GPL v2
 #
-# needs wget
+# needs GET from libwww-perl
 #
 # based on trigger.pl by Wouter Coekaerts <wouter@coekaerts.be>
 
@@ -15,8 +15,8 @@ use IO::File;
 use vars qw($VERSION %IRSSI);
 use POSIX qw(strftime);
 
-my $CVSVERSION = do { my @r = (q$Revision: 1.2 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
-my $CVSDATE = (split(/ /, '$Date: 2006-06-05 23:52:50 $'))[1];
+my $CVSVERSION = do { my @r = (q$Revision: 1.3 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+my $CVSDATE = (split(/ /, '$Date: 2006-06-06 00:38:58 $'))[1];
 $VERSION = $CVSVERSION;
 %IRSSI = (
 	authors  	=> 'Christian Garbs',
@@ -83,7 +83,7 @@ sub check_for_link {
 	
 	# write log and download
 	my $filename = Irssi::settings_get_str('youtube_downdir') . "/$file";
-	my $cmdline = "wget -O \"$filename\" -q \"$downurl\" &";
+	my $cmdline = "GET \"$downurl\" > \"$filename\" &";
 	# debug $witem->print("%R>>%n $cmdline", MSGLEVEL_CLIENTCRAP);
 	system($cmdline);
 
