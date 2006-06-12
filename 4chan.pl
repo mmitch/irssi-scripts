@@ -1,4 +1,4 @@
-# $Id: 4chan.pl,v 1.7 2006-04-08 08:22:07 mitch Exp $
+# $Id: 4chan.pl,v 1.8 2006-06-12 21:15:20 mitch Exp $
 #
 # autodownload 4chan links before they dissappear
 #
@@ -15,8 +15,8 @@ use IO::File;
 use vars qw($VERSION %IRSSI);
 use POSIX qw(strftime);
 
-my $CVSVERSION = do { my @r = (q$Revision: 1.7 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
-my $CVSDATE = (split(/ /, '$Date: 2006-04-08 08:22:07 $'))[1];
+my $CVSVERSION = do { my @r = (q$Revision: 1.8 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+my $CVSDATE = (split(/ /, '$Date: 2006-06-12 21:15:20 $'))[1];
 $VERSION = $CVSVERSION;
 %IRSSI = (
 	authors  	=> 'Christian Garbs',
@@ -82,11 +82,14 @@ sub check_for_link {
     }
 
    
-    if ($message =~ m|(http://[a-z]+\.4chan[a-z]*\.org/([a-z]+)/src/(\d+.[a-z]+))|) {
+    if ( ($message =~ m|(http://[a-z]+\.4chan[a-z]*\.org/([a-z]+)/src/(\d+.[a-z]+))|)
+	 or
+	 ($message =~ m|(http://(eins)kanal.net/images/[0-9]+/(\S+.[a-z]+))|) ){
 	my $now = strftime "%d.%m.%Y %H:%M:%S", localtime;
 	my $url = $1;
 	my $board = $2;
 	my $file = $3;
+	$file =~ s/%/%25/g;
 	
 	my $channel = ($paramchannel == -1) ? '-private-' : $signal->[$paramchannel];
 	## TODO use current nick instead of '*self*'
