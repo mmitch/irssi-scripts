@@ -1,6 +1,6 @@
-# $Id: 4chan.pl,v 1.9 2006-06-13 12:41:09 mitch Exp $
+# $Id: 4chan.pl,v 1.10 2006-06-13 12:55:38 mitch Exp $
 #
-# autodownload 4chan links before they dissappear
+# autodownload 4chan (and similar) links before they disappear
 #
 # (c) 2006 by Christian Garbs <mitch@cgarbs,de>
 # licensed under GNU GPL v2
@@ -15,14 +15,14 @@ use IO::File;
 use vars qw($VERSION %IRSSI);
 use POSIX qw(strftime);
 
-my $CVSVERSION = do { my @r = (q$Revision: 1.9 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
-my $CVSDATE = (split(/ /, '$Date: 2006-06-13 12:41:09 $'))[1];
+my $CVSVERSION = do { my @r = (q$Revision: 1.10 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+my $CVSDATE = (split(/ /, '$Date: 2006-06-13 12:55:38 $'))[1];
 $VERSION = $CVSVERSION;
 %IRSSI = (
 	authors  	=> 'Christian Garbs',
 	contact  	=> 'mitch@cgarbs.de',
 	name    	=> '4chan',
-	description 	=> 'autodownload 4chan links before they dissappear',
+	description 	=> 'autodownload 4chan (and similar) links before they disappear',
 	license 	=> 'GPLv2',
 	url     	=> 'http://www.cgarbs.de/',
 	changed  	=> $CVSDATE,
@@ -77,7 +77,7 @@ sub check_for_link {
     my $target = $signal->[$paramchannel];
     my $message = ($parammessage == -1) ? '' : $signal->[$parammessage];
     
-
+    # where are we, where do we print to?
     my $witem;
     if (defined $server) {
 	$witem = $server->window_item_find($target);
@@ -85,21 +85,30 @@ sub check_for_link {
 	$witem = Irssi::window_item_find($target);
     }
 
-   
-    if ( ($message =~ m|(http://[a-z]+\.4chan[a-z]*\.org/([a-z]+)/src/(\d+.[a-z]+))|)
-	 or
-	 ($message =~ m|(http://(eins)kanal.net/images/[0-9]+/(\S+.[a-z]+))|) ){
+    # scan for URLs
+    my ($chan, $url, $board, $file);
+    if ( $message =~ m|(http://[a-z]+\.4chan[a-z]*\.org/([a-z]+)/src/(\d+.[a-z]+))|) {
+	$chan = '4chan';
+	$url = $1;
+	$board = $2;
+	$file = $3;
+    } elsif ($message =~ m|(http://einskanal.net/images/[0-9]+/(\S+.[a-z]+))|) {
+	$chan = 'Einskanal';
+	$url = $1;
+	$board = '?';
+	$file = $2;
+    }
+
+    # download if something was found
+    if (defined $chan) {
 	my $now = strftime "%d.%m.%Y %H:%M:%S", localtime;
-	my $url = $1;
-	my $board = $2;
-	my $file = $3;
 	$file =~ s/%/%25/g;
 	
 	my $channel = ($paramchannel == -1) ? '-private-' : $signal->[$paramchannel];
 	## TODO use current nick instead of '*self*'
 	my $nick = ($paramnick == -1) ? '*self*' : $signal->[$paramnick];
 	
-	# linking sprees
+	# handle linking sprees
 	if (Irssi::settings_get_bool('4chan_announce')) {
 	    if ($last_nick{$channel} eq $nick) {
 		$spree_count{$channel}++;
@@ -123,7 +132,7 @@ sub check_for_link {
 	    }
 	}
 
-	# write log and download
+	# download
 	my $filename = Irssi::settings_get_str('4chan_downdir') . "/$file";
 	my $io = new IO::File "$filename.idx", "a";
 	if (defined $io) {
@@ -133,9 +142,11 @@ sub check_for_link {
 	    $io->print("FILE\t$file\n");
 	    $io->print("URL\t$url\n");
 	    $io->print("TIME\t$now\n");
+	    $io->print("CHAN\t$chan\n");
 	    $io->close;
 	    system("GET \"$url\" > \"$filename\" &");
-
+	    
+	    # write log
 	    if (Irssi::settings_get_bool('4chan_verbose')) {
 		if (defined $witem) {
 		    $witem->print("%R>>%n Saved 4chan link", MSGLEVEL_CLIENTCRAP);
