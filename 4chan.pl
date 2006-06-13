@@ -1,4 +1,4 @@
-# $Id: 4chan.pl,v 1.8 2006-06-12 21:15:20 mitch Exp $
+# $Id: 4chan.pl,v 1.9 2006-06-13 12:41:09 mitch Exp $
 #
 # autodownload 4chan links before they dissappear
 #
@@ -15,8 +15,8 @@ use IO::File;
 use vars qw($VERSION %IRSSI);
 use POSIX qw(strftime);
 
-my $CVSVERSION = do { my @r = (q$Revision: 1.8 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
-my $CVSDATE = (split(/ /, '$Date: 2006-06-12 21:15:20 $'))[1];
+my $CVSVERSION = do { my @r = (q$Revision: 1.9 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+my $CVSDATE = (split(/ /, '$Date: 2006-06-13 12:41:09 $'))[1];
 $VERSION = $CVSVERSION;
 %IRSSI = (
 	authors  	=> 'Christian Garbs',
@@ -30,12 +30,16 @@ $VERSION = $CVSVERSION;
 
 ## TODO help does not work
 sub cmd_help {
-	Irssi::print ( <<SCRIPTHELP_EOF
+	Irssi::print ( <<"SCRIPTHELP_EOF"
 
-set 4chan_downdir to your desired download directory
-set 4chan_verbose to show link aquisition
-set 4chan_ut to send comments on link sprees
+$IRSSI{name} - $IRSSI{changed}
+$IRSSI{description}
+$IRSSI{authors} <$IRSSI{contact}> $IRSSI{url}
 
+configuration variables:
+/set 4chan_downdir  to your desired download directory
+/set 4chan_verbose  to show link aquisition
+/set 4chan_announce to send comments on link sprees
 SCRIPTHELP_EOF
    ,MSGLEVEL_CLIENTCRAP);
 }
@@ -96,25 +100,27 @@ sub check_for_link {
 	my $nick = ($paramnick == -1) ? '*self*' : $signal->[$paramnick];
 	
 	# linking sprees
-	if ($last_nick{$channel} eq $nick) {
-	    $spree_count{$channel}++;
-	} else {
-	    $spree_count{$channel} = 1;
-	    $last_nick{$channel} = $nick;
-	}
-	if (exists $spree_text{$spree_count{$channel}}) {
-	    my $text = $spree_text{$spree_count{$channel}};
-	    $text =~ s/NICK/$nick/g;
-	    if (! ($text =~ s|\*self\*.\s*|/me |)) {
-		$text = "/SAY $text";
-	    }
-	    my $context;
-	    if ($paramchannel!=-1 && $server->channel_find($signal->[$paramchannel])) {
-		$context = $server->channel_find($signal->[$paramchannel]);
+	if (Irssi::settings_get_bool('4chan_announce')) {
+	    if ($last_nick{$channel} eq $nick) {
+		$spree_count{$channel}++;
 	    } else {
-		$context = $server;
+		$spree_count{$channel} = 1;
+		$last_nick{$channel} = $nick;
 	    }
-	    $context->command("$text");
+	    if (exists $spree_text{$spree_count{$channel}}) {
+		my $text = $spree_text{$spree_count{$channel}};
+		$text =~ s/NICK/$nick/g;
+		if (! ($text =~ s|\*self\*.\s*|/me |)) {
+		    $text = "/SAY $text";
+		}
+		my $context;
+		if ($paramchannel!=-1 && $server->channel_find($signal->[$paramchannel])) {
+		    $context = $server->channel_find($signal->[$paramchannel]);
+		} else {
+		    $context = $server;
+		}
+		$context->command("$text");
+	    }
 	}
 
 	# write log and download
@@ -130,10 +136,12 @@ sub check_for_link {
 	    $io->close;
 	    system("GET \"$url\" > \"$filename\" &");
 
-	    if (defined $witem) {
-		$witem->print("%R>>%n Saved 4chan link", MSGLEVEL_CLIENTCRAP);
-	    } else {
-		Irssi::print("%R>>%n Saved 4chan $filename");
+	    if (Irssi::settings_get_bool('4chan_verbose')) {
+		if (defined $witem) {
+		    $witem->print("%R>>%n Saved 4chan link", MSGLEVEL_CLIENTCRAP);
+		} else {
+		    Irssi::print("%R>>%n Saved 4chan $filename");
+		}
 	    }
 
 	}
@@ -143,11 +151,12 @@ sub check_for_link {
 
 # init
 
-command_bind('4chan help',\&cmd_help);
-command_bind('help 4chan',\&cmd_help);
+command_bind('4chan',\&cmd_help);
 signal_add_first 'default command 4chan' => sub {
 	# gets triggered if called with unknown subcommand
 	cmd_help();
 };
 
-Irssi::settings_add_str($IRSSI{'name'}, '4chan_downdir', "$ENV{HOME}/4chan");
+Irssi::settings_add_str( $IRSSI{'name'}, '4chan_downdir',  "$ENV{HOME}/4chan");
+Irssi::settings_add_bool($IRSSI{'name'}, '4chan_verbose',  '1');
+Irssi::settings_add_bool($IRSSI{'name'}, '4chan_announce', '0');
