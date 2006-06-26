@@ -1,4 +1,4 @@
-# $Id: youtube.pl,v 1.5 2006-06-26 21:55:57 mitch Exp $
+# $Id: youtube.pl,v 1.6 2006-06-26 21:57:22 mitch Exp $
 #
 # autodownload youtube videos
 #
@@ -22,8 +22,8 @@ use IO::File;
 use vars qw($VERSION %IRSSI);
 use POSIX qw(strftime);
 
-my $CVSVERSION = do { my @r = (q$Revision: 1.5 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
-my $CVSDATE = (split(/ /, '$Date: 2006-06-26 21:55:57 $'))[1];
+my $CVSVERSION = do { my @r = (q$Revision: 1.6 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+my $CVSDATE = (split(/ /, '$Date: 2006-06-26 21:57:22 $'))[1];
 $VERSION = $CVSVERSION;
 %IRSSI = (
 	authors  	=> 'Christian Garbs',
@@ -109,12 +109,15 @@ sub check_for_link {
 	    my $cmdline = "GET \"$downurl\" > \"$filename\" &";
 	    #debug $witem->print("%RF>>%n xx${cmdline}xx", MSGLEVEL_CLIENTCRAP);
 	    system($cmdline);
-	    
-	    if (defined $witem) {
-		$witem->print("%R>>%n Saving youtube $videotitle", MSGLEVEL_CLIENTCRAP);
-	    } else {
-		Irssi::print("%R>>%n Saving youtube $videotitle");
-	    }
+
+	    # write log
+            if (Irssi::settings_get_bool('youtube_verbose')) {
+	        if (defined $witem) {
+		    $witem->print("%R>>%n Saving youtube $videotitle", MSGLEVEL_CLIENTCRAP);
+	        } else {
+		    Irssi::print("%R>>%n Saving youtube $videotitle");
+	        }
+            }
 	}
 	
     }
@@ -128,4 +131,5 @@ signal_add_first 'default command youtube' => sub {
 	cmd_help();
 };
 
-Irssi::settings_add_str($IRSSI{'name'}, 'youtube_downdir', "$ENV{HOME}/youtube");
+Irssi::settings_add_str( $IRSSI{'name'}, 'youtube_downdir', "$ENV{HOME}/youtube");
+Irssi::settings_add_bool($IRSSI{'name'}, 'youtube_verbose', '1');
