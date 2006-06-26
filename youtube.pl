@@ -1,4 +1,4 @@
-# $Id: youtube.pl,v 1.3 2006-06-06 00:38:58 mitch Exp $
+# $Id: youtube.pl,v 1.4 2006-06-26 21:50:38 mitch Exp $
 #
 # autodownload youtube videos
 #
@@ -8,6 +8,13 @@
 # needs GET from libwww-perl
 #
 # based on trigger.pl by Wouter Coekaerts <wouter@coekaerts.be>
+# download strategy revised using
+# http://www.kde-apps.org/content/show.php?content=41456
+
+#
+# TODO:
+# download only when enough space available -> prevent DoS
+#
 
 use strict;
 use Irssi 20020324 qw (command_bind signal_add_first signal_add_last);
@@ -15,8 +22,8 @@ use IO::File;
 use vars qw($VERSION %IRSSI);
 use POSIX qw(strftime);
 
-my $CVSVERSION = do { my @r = (q$Revision: 1.3 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
-my $CVSDATE = (split(/ /, '$Date: 2006-06-06 00:38:58 $'))[1];
+my $CVSVERSION = do { my @r = (q$Revision: 1.4 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+my $CVSDATE = (split(/ /, '$Date: 2006-06-26 21:50:38 $'))[1];
 $VERSION = $CVSVERSION;
 %IRSSI = (
 	authors  	=> 'Christian Garbs',
@@ -70,36 +77,48 @@ sub check_for_link {
     }
 
    
-    if ($message =~ m|(http://www.youtube.com/watch\?(?:.+=.+&)*v=([a-zA-Z0-9]+))|) {
+    if ($message =~ m|(http://www.youtube.com/watch\?(?:.+=.+&)*v=([-a-zA-Z0-9_]+))|) {
 	my $pageurl = $1;
 	my $file = $2;
-	my $downurl = "http://v100.youtube.com/get_video?video_id=$file";
 
-	my $videotitle = `GET $pageurl | grep 'name="title"'`;
-	$videotitle =~ /content="(.*)">/;
-	$videotitle = $1;
-	$videotitle =~ y/ /_/;
-	$file .= "_$videotitle";
-	
-	# write log and download
-	my $filename = Irssi::settings_get_str('youtube_downdir') . "/$file";
-	my $cmdline = "GET \"$downurl\" > \"$filename\" &";
-	# debug $witem->print("%R>>%n $cmdline", MSGLEVEL_CLIENTCRAP);
-	system($cmdline);
+	my $string = `GET $pageurl | grep '/watch_fullscreen'`;
 
-	if (defined $witem) {
-	    $witem->print("%R>>%n Saved youtube $videotitle", MSGLEVEL_CLIENTCRAP);
-	} else {
-	    Irssi::print("%R>>%n Saved youtube $videotitle");
+        #debug $witem->print("%RA%n $pageurl xx${string}xx", MSGLEVEL_CLIENTCRAP);
+	if ($string =~ m/watch_fullscreen\?(.*)&fs/) {
+	    #debug $witem->print("%RB%n xx${1}xx", MSGLEVEL_CLIENTCRAP);
+	    my $request = $1;
+	    my $videotitle = $file;
+
+	    if ($string =~ m/&title=" \+ "([^"]*)"/) {
+		#debug $witem->print("%RC%n xx${1}xx", MSGLEVEL_CLIENTCRAP);
+		$videotitle = $1;
+		$videotitle =~ y/ /_/;
+		$file .= "_$videotitle";
+	    }
+	    #debug $witem->print("%RD%n xx${request}xx", MSGLEVEL_CLIENTCRAP);
+
+	    my $downurl = "http://youtube.com/get_video.php?$request";
+	    #debug $witem->print("%RE%n xx${downurl}xx", MSGLEVEL_CLIENTCRAP);
+	    
+	    # write log and download
+	    my $filename = Irssi::settings_get_str('youtube_downdir') . "/$file";
+	    my $cmdline = "GET \"$downurl\" > \"$filename\" &";
+	    #debug $witem->print("%RF>>%n xx${cmdline}xx", MSGLEVEL_CLIENTCRAP);
+	    system($cmdline);
+	    
+	    if (defined $witem) {
+		$witem->print("%R>>%n Saving youtube $videotitle", MSGLEVEL_CLIENTCRAP);
+	    } else {
+		Irssi::print("%R>>%n Saving youtube $videotitle");
+	    }
 	}
-
+	
     }
 }
 
 # init
 
-command_bind('youtube help',\&cmd_help);
-command_bind('help youtube',\&cmd_help);
+command_bind('youtube',\&cmd_help);
 signal_add_first 'default command youtube' => sub {
 	# gets triggered if called with unknown subcommand
 	cmd_help();
