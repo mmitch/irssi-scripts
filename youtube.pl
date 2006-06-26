@@ -1,4 +1,4 @@
-# $Id: youtube.pl,v 1.4 2006-06-26 21:50:38 mitch Exp $
+# $Id: youtube.pl,v 1.5 2006-06-26 21:55:57 mitch Exp $
 #
 # autodownload youtube videos
 #
@@ -22,8 +22,8 @@ use IO::File;
 use vars qw($VERSION %IRSSI);
 use POSIX qw(strftime);
 
-my $CVSVERSION = do { my @r = (q$Revision: 1.4 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
-my $CVSDATE = (split(/ /, '$Date: 2006-06-26 21:50:38 $'))[1];
+my $CVSVERSION = do { my @r = (q$Revision: 1.5 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+my $CVSDATE = (split(/ /, '$Date: 2006-06-26 21:55:57 $'))[1];
 $VERSION = $CVSVERSION;
 %IRSSI = (
 	authors  	=> 'Christian Garbs',
@@ -39,9 +39,13 @@ $VERSION = $CVSVERSION;
 sub cmd_help {
 	Irssi::print ( <<SCRIPTHELP_EOF
 
-set youtube_downdir to your desired download directory
-set youtube_verbose to show link aquisition
+$IRSSI{name} - $IRSSI{changed}
+$IRSSI{description}
+$IRSSI{authors} <$IRSSI{contact}> $IRSSI{url}
 
+configuration variables:
+/set youtube_downdir  to your desired download directory
+/set youtube_verbose  to show link aquisition
 SCRIPTHELP_EOF
    ,MSGLEVEL_CLIENTCRAP);
 }
