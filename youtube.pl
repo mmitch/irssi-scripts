@@ -1,4 +1,4 @@
-# $Id: youtube.pl,v 1.6 2006-06-26 21:57:22 mitch Exp $
+# $Id: youtube.pl,v 1.7 2006-06-29 21:04:27 mitch Exp $
 #
 # autodownload youtube videos
 #
@@ -22,8 +22,8 @@ use IO::File;
 use vars qw($VERSION %IRSSI);
 use POSIX qw(strftime);
 
-my $CVSVERSION = do { my @r = (q$Revision: 1.6 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
-my $CVSDATE = (split(/ /, '$Date: 2006-06-26 21:57:22 $'))[1];
+my $CVSVERSION = do { my @r = (q$Revision: 1.7 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+my $CVSDATE = (split(/ /, '$Date: 2006-06-29 21:04:27 $'))[1];
 $VERSION = $CVSVERSION;
 %IRSSI = (
 	authors  	=> 'Christian Garbs',
@@ -35,6 +35,9 @@ $VERSION = $CVSVERSION;
 	changed  	=> $CVSDATE,
 );
 
+# activate debug here
+my $debug = 0;
+
 ## TODO help does not work
 sub cmd_help {
 	Irssi::print ( <<SCRIPTHELP_EOF
@@ -44,8 +47,11 @@ $IRSSI{description}
 $IRSSI{authors} <$IRSSI{contact}> $IRSSI{url}
 
 configuration variables:
-/set youtube_downdir  to your desired download directory
-/set youtube_verbose  to show link aquisition
+/set youtube_downdir    the download directory
+/set youtube_verbose    show link aquisition
+/set youtube_freespace  minimum space to be free
+                        in downdir in 1024-blocks
+                        (should prevent DoS)
 SCRIPTHELP_EOF
    ,MSGLEVEL_CLIENTCRAP);
 }
@@ -65,13 +71,57 @@ signal_add_last("message irc action" => sub {check_for_link(\@_,1,4,2,0);});
 # "message irc own_action", SERVER_REC, char *msg, char *target
 signal_add_last("message irc own_action" => sub {check_for_link(\@_,1,2,-1,0);});
 
+sub write_irssi($$) {
+    my $witem = shift;
+    my $text  = shift;
+
+    if (defined $witem) {
+	$witem->print($text, MSGLEVEL_CLIENTCRAP);
+    } else {
+	Irssi::print($text) ;
+    }
+
+}
+
+sub write_verbose($$) {
+    if (Irssi::settings_get_bool('youtube_verbose')) {
+	write_irssi(shift, shift);
+    }
+}
+
+sub write_debug($$) {
+    if ($debug) {
+	write_irssi(shift, shift);
+    }
+}
+
+sub diskfree($) {
+    # poor man's df
+    # if you want it portable, use Filesys::Statvfs
+    my $dir = shift;
+    my $size;
+
+    open DF, "df -P $dir|" or warn "can't open df: $!";
+    my $line = <DF>; # skip header
+
+    if ( $line = <DF> ) {
+	if ($line =~ /\s(\d+)\s+\d{1,3}% (\/.*)$/) {
+	    $size = $1;
+	}
+    } else {
+	$size = -1; #some error occurred
+    }
+
+    close DF or warn "can't close df: $!";
+    return $size;
+}
 
 sub check_for_link {
     my ($signal,$parammessage,$paramchannel,$paramnick,$paramserver) = @_;
     my $server = $signal->[$paramserver];
     my $target = $signal->[$paramchannel];
     my $message = ($parammessage == -1) ? '' : $signal->[$parammessage];
-    
+
 
     my $witem;
     if (defined $server) {
@@ -80,44 +130,56 @@ sub check_for_link {
 	$witem = Irssi::window_item_find($target);
     }
 
-   
+
     if ($message =~ m|(http://www.youtube.com/watch\?(?:.+=.+&)*v=([-a-zA-Z0-9_]+))|) {
 	my $pageurl = $1;
 	my $file = $2;
 
+	# do some checks
+	my $downdir = Irssi::settings_get_str('youtube_downdir');
+	unless (-e $downdir) {
+	    write_irssi($witem, "%R>>%n youtube_downdir does not exist!");
+	    return;
+	}
+	unless (-d $downdir) {
+	    write_irssi($witem, "%R>>%n youtube_downdir exists but is no directory!");
+	    return;
+	}
+	unless (-w $downdir) {
+	    write_irssi($witem, "%R>>%n youtube_downdir is not writeable!");
+	    return;
+	}
+	if (diskfree($downdir) < Irssi::settings_get_int('youtube_freespace')) {
+	    write_irssi($witem, "%R>>%n youtube_downdir has not enough free space left!");
+	    return;
+	}
+
 	my $string = `GET $pageurl | grep '/watch_fullscreen'`;
 
-        #debug $witem->print("%RA%n $pageurl xx${string}xx", MSGLEVEL_CLIENTCRAP);
+        write_debug($witem, "%RA%n $pageurl xx${string}xx");
 	if ($string =~ m/watch_fullscreen\?(.*)&fs/) {
-	    #debug $witem->print("%RB%n xx${1}xx", MSGLEVEL_CLIENTCRAP);
+	    write_debug($witem, "%RB%n xx${1}xx");
 	    my $request = $1;
 	    my $videotitle = $file;
 
 	    if ($string =~ m/&title=" \+ "([^"]*)"/) {
-		#debug $witem->print("%RC%n xx${1}xx", MSGLEVEL_CLIENTCRAP);
+		write_debug($witem, "%RC%n xx${1}xx");
 		$videotitle = $1;
 		$videotitle =~ y/ /_/;
 		$file .= "_$videotitle";
 	    }
-	    #debug $witem->print("%RD%n xx${request}xx", MSGLEVEL_CLIENTCRAP);
+	    write_debug($witem, "%RD%n xx${request}xx");
 
 	    my $downurl = "http://youtube.com/get_video.php?$request";
-	    #debug $witem->print("%RE%n xx${downurl}xx", MSGLEVEL_CLIENTCRAP);
-	    
+	    write_debug($witem, "%RE%n xx${downurl}xx");
+	
 	    # write log and download
-	    my $filename = Irssi::settings_get_str('youtube_downdir') . "/$file";
+	    my $filename = "$downdir/$file";
 	    my $cmdline = "GET \"$downurl\" > \"$filename\" &";
-	    #debug $witem->print("%RF>>%n xx${cmdline}xx", MSGLEVEL_CLIENTCRAP);
+	    write_debug($witem, "%RF%n xx${cmdline}xx");
 	    system($cmdline);
+	    write_verbose($witem, "%R>>%n Saving youtube $videotitle");
 
-	    # write log
-            if (Irssi::settings_get_bool('youtube_verbose')) {
-	        if (defined $witem) {
-		    $witem->print("%R>>%n Saving youtube $videotitle", MSGLEVEL_CLIENTCRAP);
-	        } else {
-		    Irssi::print("%R>>%n Saving youtube $videotitle");
-	        }
-            }
 	}
 	
     }
@@ -131,5 +193,6 @@ signal_add_first 'default command youtube' => sub {
 	cmd_help();
 };
 
-Irssi::settings_add_str( $IRSSI{'name'}, 'youtube_downdir', "$ENV{HOME}/youtube");
-Irssi::settings_add_bool($IRSSI{'name'}, 'youtube_verbose', '1');
+Irssi::settings_add_str( $IRSSI{'name'}, 'youtube_downdir',   "$ENV{HOME}/youtube");
+Irssi::settings_add_int( $IRSSI{'name'}, 'youtube_freespace', 100 * 1024);
+Irssi::settings_add_bool($IRSSI{'name'}, 'youtube_verbose',   1);
