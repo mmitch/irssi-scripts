@@ -1,4 +1,4 @@
-# $Id: 4chan.pl,v 1.12 2006-06-29 21:07:38 mitch Exp $
+# $Id: 4chan.pl,v 1.13 2006-06-29 21:08:59 mitch Exp $
 #
 # autodownload 4chan (and similar) links before they disappear
 #
@@ -20,8 +20,8 @@ use IO::File;
 use vars qw($VERSION %IRSSI);
 use POSIX qw(strftime);
 
-my $CVSVERSION = do { my @r = (q$Revision: 1.12 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
-my $CVSDATE = (split(/ /, '$Date: 2006-06-29 21:07:38 $'))[1];
+my $CVSVERSION = do { my @r = (q$Revision: 1.13 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+my $CVSDATE = (split(/ /, '$Date: 2006-06-29 21:08:59 $'))[1];
 $VERSION = $CVSVERSION;
 %IRSSI = (
 	authors  	=> 'Christian Garbs',
@@ -164,8 +164,23 @@ sub check_for_link {
 	    }
 	}
 
+	# do some checks
+	my $downdir = Irssi::settings_get_str('4chan_downdir');
+	unless (-e $downdir) {
+	    write_irssi($witem, "%R>>%n 4chan_downdir does not exist!");
+	    return;
+	}
+	unless (-d $downdir) {
+	    write_irssi($witem, "%R>>%n 4chan_downdir exists but is no directory!");
+	    return;
+	}
+	unless (-w $downdir) {
+	    write_irssi($witem, "%R>>%n 4chan_downdir is not writeable!");
+	    return;
+	}
+
 	# download
-	my $filename = Irssi::settings_get_str('4chan_downdir') . "/$file";
+	my $filename = "$downdir/$file";
 	my $io = new IO::File "$filename.idx", "a";
 	if (defined $io) {
 	    $io->print("NICK\t$nick\n");
