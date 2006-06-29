@@ -1,4 +1,4 @@
-# $Id: 4chan.pl,v 1.14 2006-06-29 21:13:38 mitch Exp $
+# $Id: 4chan.pl,v 1.15 2006-06-29 21:14:12 mitch Exp $
 #
 # autodownload 4chan (and similar) links before they disappear
 #
@@ -20,8 +20,8 @@ use IO::File;
 use vars qw($VERSION %IRSSI);
 use POSIX qw(strftime);
 
-my $CVSVERSION = do { my @r = (q$Revision: 1.14 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
-my $CVSDATE = (split(/ /, '$Date: 2006-06-29 21:13:38 $'))[1];
+my $CVSVERSION = do { my @r = (q$Revision: 1.15 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+my $CVSDATE = (split(/ /, '$Date: 2006-06-29 21:14:12 $'))[1];
 $VERSION = $CVSVERSION;
 %IRSSI = (
 	authors  	=> 'Christian Garbs',
@@ -34,7 +34,7 @@ $VERSION = $CVSVERSION;
 );
 
 # activate debug here
-my $debug = 0M
+my $debug = 0;
 
 ## TODO help does not work
 sub cmd_help {
