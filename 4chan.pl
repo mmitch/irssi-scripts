@@ -1,4 +1,4 @@
-# $Id: 4chan.pl,v 1.13 2006-06-29 21:08:59 mitch Exp $
+# $Id: 4chan.pl,v 1.14 2006-06-29 21:13:38 mitch Exp $
 #
 # autodownload 4chan (and similar) links before they disappear
 #
@@ -20,8 +20,8 @@ use IO::File;
 use vars qw($VERSION %IRSSI);
 use POSIX qw(strftime);
 
-my $CVSVERSION = do { my @r = (q$Revision: 1.13 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
-my $CVSDATE = (split(/ /, '$Date: 2006-06-29 21:08:59 $'))[1];
+my $CVSVERSION = do { my @r = (q$Revision: 1.14 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+my $CVSDATE = (split(/ /, '$Date: 2006-06-29 21:13:38 $'))[1];
 $VERSION = $CVSVERSION;
 %IRSSI = (
 	authors  	=> 'Christian Garbs',
@@ -45,9 +45,12 @@ $IRSSI{description}
 $IRSSI{authors} <$IRSSI{contact}> $IRSSI{url}
 
 configuration variables:
-/set 4chan_downdir  to your desired download directory
-/set 4chan_verbose  to show link aquisition
-/set 4chan_announce to send comments on link sprees
+/set 4chan_announce   announce linking sprees
+/set 4chan_downdir    the download directory
+/set 4chan_verbose    show link aquisition
+/set 4chan_freespace  minimum space to be free
+                      in downdir in 1024-blocks
+                      (should prevent DoS)
 SCRIPTHELP_EOF
    ,MSGLEVEL_CLIENTCRAP);
 }
@@ -101,6 +104,27 @@ sub write_debug($$) {
     if ($debug) {
 	write_irssi(shift, shift);
     }
+}
+
+sub diskfree($) {
+    # poor man's df
+    # if you want it portable, use Filesys::Statvfs
+    my $dir = shift;
+    my $size;
+
+    open DF, "df -P $dir|" or warn "can't open df: $!";
+    my $line = <DF>; # skip header
+
+    if ( $line = <DF> ) {
+	if ($line =~ /\s(\d+)\s+\d{1,3}% (\/.*)$/) {
+	    $size = $1;
+	}
+    } else {
+	$size = -1; #some error occurred
+    }
+
+    close DF or warn "can't close df: $!";
+    return $size;
 }
 
 sub check_for_link {
@@ -178,6 +202,10 @@ sub check_for_link {
 	    write_irssi($witem, "%R>>%n 4chan_downdir is not writeable!");
 	    return;
 	}
+	if (diskfree($downdir) < Irssi::settings_get_int('4chan_freespace')) {
+	    write_irssi($witem, "%R>>%n 4chan_downdir has not enough free space left!");
+	    return;
+	}
 
 	# download
 	my $filename = "$downdir/$file";
@@ -206,6 +234,7 @@ signal_add_first 'default command 4chan' => sub {
 	cmd_help();
 };
 
-Irssi::settings_add_str( $IRSSI{'name'}, '4chan_downdir',  "$ENV{HOME}/4chan");
-Irssi::settings_add_bool($IRSSI{'name'}, '4chan_verbose',  '1');
-Irssi::settings_add_bool($IRSSI{'name'}, '4chan_announce', '0');
+Irssi::settings_add_bool($IRSSI{'name'}, '4chan_announce',  0);
+Irssi::settings_add_str( $IRSSI{'name'}, '4chan_downdir',   "$ENV{HOME}/4chan");
+Irssi::settings_add_int( $IRSSI{'name'}, '4chan_freespace', 100 * 1024);
+Irssi::settings_add_bool($IRSSI{'name'}, '4chan_verbose',   1);
