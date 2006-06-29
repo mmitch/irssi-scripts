@@ -1,4 +1,4 @@
-# $Id: 4chan.pl,v 1.11 2006-06-26 21:23:03 mitch Exp $
+# $Id: 4chan.pl,v 1.12 2006-06-29 21:07:38 mitch Exp $
 #
 # autodownload 4chan (and similar) links before they disappear
 #
@@ -20,8 +20,8 @@ use IO::File;
 use vars qw($VERSION %IRSSI);
 use POSIX qw(strftime);
 
-my $CVSVERSION = do { my @r = (q$Revision: 1.11 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
-my $CVSDATE = (split(/ /, '$Date: 2006-06-26 21:23:03 $'))[1];
+my $CVSVERSION = do { my @r = (q$Revision: 1.12 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+my $CVSDATE = (split(/ /, '$Date: 2006-06-29 21:07:38 $'))[1];
 $VERSION = $CVSVERSION;
 %IRSSI = (
 	authors  	=> 'Christian Garbs',
@@ -32,6 +32,9 @@ $VERSION = $CVSVERSION;
 	url     	=> 'http://www.cgarbs.de/',
 	changed  	=> $CVSDATE,
 );
+
+# activate debug here
+my $debug = 0M
 
 ## TODO help does not work
 sub cmd_help {
@@ -59,7 +62,7 @@ my %spree_text = (
    25 => 'NICK is godlike',
    30 => 'NICK: WICKED SICK!',
    );
-    
+
 # "message public", SERVER_REC, char *msg, char *nick, char *address, char *target
 signal_add_last("message public" => sub {check_for_link(\@_,1,4,2,0);});
 # "message own_public", SERVER_REC, char *msg, char *target
@@ -76,12 +79,36 @@ signal_add_last("message irc action" => sub {check_for_link(\@_,1,4,2,0);});
 signal_add_last("message irc own_action" => sub {check_for_link(\@_,1,2,-1,0);});
 
 
+sub write_irssi($$) {
+    my $witem = shift;
+    my $text  = shift;
+
+    if (defined $witem) {
+	$witem->print($text, MSGLEVEL_CLIENTCRAP);
+    } else {
+	Irssi::print($text) ;
+    }
+
+}
+
+sub write_verbose($$) {
+    if (Irssi::settings_get_bool('4chan_verbose')) {
+	write_irssi(shift, shift);
+    }
+}
+
+sub write_debug($$) {
+    if ($debug) {
+	write_irssi(shift, shift);
+    }
+}
+
 sub check_for_link {
     my ($signal,$parammessage,$paramchannel,$paramnick,$paramserver) = @_;
     my $server = $signal->[$paramserver];
     my $target = $signal->[$paramchannel];
     my $message = ($parammessage == -1) ? '' : $signal->[$parammessage];
-    
+
     # where are we, where do we print to?
     my $witem;
     if (defined $server) {
@@ -150,16 +177,7 @@ sub check_for_link {
 	    $io->print("CHAN\t$chan\n");
 	    $io->close;
 	    system("GET \"$url\" > \"$filename\" &");
-	    
-	    # write log
-	    if (Irssi::settings_get_bool('4chan_verbose')) {
-		if (defined $witem) {
-		    $witem->print("%R>>%n Saved 4chan link", MSGLEVEL_CLIENTCRAP);
-		} else {
-		    Irssi::print("%R>>%n Saved 4chan $filename");
-		}
-	    }
-
+	    write_verbose($witem, "%R>>%n Saving 4chan link");
 	}
 
     }
