@@ -1,4 +1,4 @@
-# $Id: youtube.pl,v 1.7 2006-06-29 21:04:27 mitch Exp $
+# $Id: youtube.pl,v 1.8 2006-07-18 18:44:44 mitch Exp $
 #
 # autodownload youtube videos
 #
@@ -13,7 +13,7 @@
 
 #
 # TODO:
-# download only when enough space available -> prevent DoS
+# don't overwrite existing file later with an 404
 #
 
 use strict;
@@ -22,8 +22,8 @@ use IO::File;
 use vars qw($VERSION %IRSSI);
 use POSIX qw(strftime);
 
-my $CVSVERSION = do { my @r = (q$Revision: 1.7 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
-my $CVSDATE = (split(/ /, '$Date: 2006-06-29 21:04:27 $'))[1];
+my $CVSVERSION = do { my @r = (q$Revision: 1.8 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+my $CVSDATE = (split(/ /, '$Date: 2006-07-18 18:44:44 $'))[1];
 $VERSION = $CVSVERSION;
 %IRSSI = (
 	authors  	=> 'Christian Garbs',
