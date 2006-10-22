@@ -1,4 +1,4 @@
-# $Id: youtube.pl,v 1.11 2006-08-08 21:07:54 mitch Exp $
+# $Id: youtube.pl,v 1.12 2006-10-22 15:28:30 mitch Exp $
 #
 # autodownload youtube videos
 #
@@ -22,8 +22,8 @@ use IO::File;
 use vars qw($VERSION %IRSSI);
 use POSIX qw(strftime);
 
-my $CVSVERSION = do { my @r = (q$Revision: 1.11 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
-my $CVSDATE = (split(/ /, '$Date: 2006-08-08 21:07:54 $'))[1];
+my $CVSVERSION = do { my @r = (q$Revision: 1.12 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+my $CVSDATE = (split(/ /, '$Date: 2006-10-22 15:28:30 $'))[1];
 $VERSION = $CVSVERSION;
 %IRSSI = (
 	authors  	=> 'Christian Garbs',
@@ -166,7 +166,7 @@ sub check_for_link {
 	    if ($string =~ m/&title=" \+ "([^"]*)"/) {
 		write_debug($witem, "%RC%n xx${1}xx");
 		$videotitle = $1;
-		$videotitle =~ y/ /_/;
+		$videotitle =~ y|/ |__|;
 		$file .= "_$videotitle";
 	    }
 	    write_debug($witem, "%RD%n xx${request}xx");
