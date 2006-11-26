@@ -1,4 +1,4 @@
-# $Id: 4chan.pl,v 1.19 2006-08-11 18:13:06 mitch Exp $
+# $Id: 4chan.pl,v 1.20 2006-11-26 02:25:03 mitch Exp $
 #
 # autodownload 4chan (and similar) links before they disappear
 #
@@ -15,13 +15,13 @@
 #
 
 use strict;
-use Irssi 20020324 qw (command_bind signal_add_first signal_add_last);
+use Irssi 20020324 qw (command_bind command_runsub signal_add_first signal_add_last);
 use IO::File;
 use vars qw($VERSION %IRSSI);
 use POSIX qw(strftime);
 
-my $CVSVERSION = do { my @r = (q$Revision: 1.19 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
-my $CVSDATE = (split(/ /, '$Date: 2006-08-11 18:13:06 $'))[1];
+my $CVSVERSION = do { my @r = (q$Revision: 1.20 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+my $CVSDATE = (split(/ /, '$Date: 2006-11-26 02:25:03 $'))[1];
 $VERSION = $CVSVERSION;
 %IRSSI = (
 	authors  	=> 'Christian Garbs',
@@ -46,6 +46,7 @@ $IRSSI{authors} <$IRSSI{contact}> $IRSSI{url}
 
 configuration variables:
 /set 4chan_announce   announce linking sprees
+/set 4chan_conffile   configuration file
 /set 4chan_downdir    the download directory
 /set 4chan_verbose    show link aquisition
 /set 4chan_freespace  minimum space to be free
@@ -231,15 +232,66 @@ sub check_for_link {
     }
 }
 
+sub cmd_save {
+    
+    my $filename = Irssi::settings_get_str('4chan_conffile');
+    my $io = new IO::File $filename, "w";
+    if (defined $io) {
+	$io->print("ANNOUNCE\t"  . Irssi::settings_get_bool('4chan_announce')  . "\n");
+	$io->print("DOWNDIR\t"   . Irssi::settings_get_str( '4chan_downdir')   . "\n");
+	$io->print("FREESPACE\t" . Irssi::settings_get_int( '4chan_freespace') . "\n");
+	$io->print("VERBOSE\t"   . Irssi::settings_get_bool('4chan_verbose')   . "\n");
+	$io->close;
+ 	Irssi::print("4chan configuration saved to ".$filename);
+    } else {
+	Irssi::print("could not write 4chan configuration to ".$filename.": $!");
+    }
+    
+}
+
+sub cmd_load {
+    
+    my $filename = Irssi::settings_get_str('4chan_conffile');
+    my $io = new IO::File $filename, "r";
+    if (defined $io) {
+	foreach my $line ($io->getlines) {
+	    chomp $line;
+	    if ($line =~ /^([A-Z]+)\t(.*)$/) {
+		if ($1 eq 'ANNOUNCE') {
+		    Irssi::settings_set_bool('4chan_announce',  $2);
+		} elsif ($1 eq 'DOWNDIR') {
+		    Irssi::settings_set_str( '4chan_downdir',   $2);
+		} elsif ($1 eq 'FREESPACE') {
+		    Irssi::settings_set_int( '4chan_freespace', $2);
+		} elsif ($1 eq 'VERBOSE') {
+		    Irssi::settings_set_bool('4chan_verbose',   $2);
+		  }
+	    }
+	}
+	Irssi::print("4chan configuration loaded from ".$filename);
+    } else {
+	Irssi::print("could not load 4chan configuration from ".$filename.": $!");
+    }
+}
+
 # init
 
-command_bind('4chan',\&cmd_help);
+command_bind('help 4chan',\&cmd_help);
+command_bind('4chan help',\&cmd_help);
+command_bind('4chan load',\&cmd_load);
+command_bind('4chan save',\&cmd_save);
+command_bind '4chan' => sub {
+    my ( $data, $server, $item ) = @_;
+    $data =~ s/\s+$//g;
+    command_runsub ( '4chan', $data, $server, $item ) ;
+};
 signal_add_first 'default command 4chan' => sub {
 	# gets triggered if called with unknown subcommand
 	cmd_help();
 };
 
 Irssi::settings_add_bool($IRSSI{'name'}, '4chan_announce',  0);
-Irssi::settings_add_str( $IRSSI{'name'}, '4chan_downdir',   "$ENV{HOME}/4chan");
+Irssi::settings_add_str( $IRSSI{'name'}, '4chan_conffile',  Irssi::get_irssi_dir()."/4chan.cf");
+Irssi::settings_add_str( $IRSSI{'name'}, '4chan_downdir',   "$ENV{HOME}/pub/4chan");
 Irssi::settings_add_int( $IRSSI{'name'}, '4chan_freespace', 100 * 1024);
 Irssi::settings_add_bool($IRSSI{'name'}, '4chan_verbose',   1);

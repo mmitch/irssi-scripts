@@ -1,4 +1,4 @@
-# $Id: youtube.pl,v 1.12 2006-10-22 15:28:30 mitch Exp $
+# $Id: youtube.pl,v 1.13 2006-11-26 02:20:26 mitch Exp $
 #
 # autodownload youtube videos
 #
@@ -17,13 +17,14 @@
 #
 
 use strict;
-use Irssi 20020324 qw (command_bind signal_add_first signal_add_last);
+use Irssi 20020324 qw (command_bind command_runsub signal_add_first signal_add_last);
 use IO::File;
 use vars qw($VERSION %IRSSI);
 use POSIX qw(strftime);
+use Data::Dumper;
 
-my $CVSVERSION = do { my @r = (q$Revision: 1.12 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
-my $CVSDATE = (split(/ /, '$Date: 2006-10-22 15:28:30 $'))[1];
+my $CVSVERSION = do { my @r = (q$Revision: 1.13 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+my $CVSDATE = (split(/ /, '$Date: 2006-11-26 02:20:26 $'))[1];
 $VERSION = $CVSVERSION;
 %IRSSI = (
 	authors  	=> 'Christian Garbs',
@@ -38,7 +39,6 @@ $VERSION = $CVSVERSION;
 # activate debug here
 my $debug = 0;
 
-## TODO help does not work
 sub cmd_help {
 	Irssi::print ( <<SCRIPTHELP_EOF
 
@@ -186,14 +186,62 @@ sub check_for_link {
     }
 }
 
+sub cmd_save {
+    
+    my $filename = Irssi::settings_get_str('youtube_conffile');
+    my $io = new IO::File $filename, "w";
+    if (defined $io) {
+	$io->print("DOWNDIR\t"   . Irssi::settings_get_str( 'youtube_downdir')   . "\n");
+	$io->print("FREESPACE\t" . Irssi::settings_get_int( 'youtube_freespace') . "\n");
+	$io->print("VERBOSE\t"   . Irssi::settings_get_bool('youtube_verbose')   . "\n");
+	$io->close;
+ 	Irssi::print("youtube configuration saved to ".$filename);
+    } else {
+	Irssi::print("could not write youtube configuration to ".$filename.": $!");
+    }
+    
+}
+
+sub cmd_load {
+    
+    my $filename = Irssi::settings_get_str('youtube_conffile');
+    my $io = new IO::File $filename, "r";
+    if (defined $io) {
+	foreach my $line ($io->getlines) {
+	    chomp $line;
+	    if ($line =~ /^([A-Z]+)\t(.*)$/) {
+		if ($1 eq 'DOWNDIR') {
+		    Irssi::settings_set_str( 'youtube_downdir', $2);
+		} elsif ($1 eq 'FREESPACE') {
+		    Irssi::settings_set_int( 'youtube_freespace', $2);
+		} elsif ($1 eq 'VERBOSE') {
+		    Irssi::settings_set_bool('youtube_verbose', $2);
+		  }
+	    }
+	}
+	Irssi::print("youtube configuration loaded from ".$filename);
+    } else {
+	Irssi::print("could not load youtube configuration from ".$filename.": $!");
+    }
+}
+
 # init
 
-command_bind('youtube',\&cmd_help);
+command_bind('help youtube',\&cmd_help);
+command_bind('youtube help',\&cmd_help);
+command_bind('youtube load',\&cmd_load);
+command_bind('youtube save',\&cmd_save);
+command_bind 'youtube' => sub {
+    my ( $data, $server, $item ) = @_;
+    $data =~ s/\s+$//g;
+    command_runsub ( 'youtube', $data, $server, $item ) ;
+};
 signal_add_first 'default command youtube' => sub {
 	# gets triggered if called with unknown subcommand
 	cmd_help();
 };
 
+Irssi::settings_add_str( $IRSSI{'name'}, 'youtube_conffile',  Irssi::get_irssi_dir()."/youtube.cf");
 Irssi::settings_add_str( $IRSSI{'name'}, 'youtube_downdir',   "$ENV{HOME}/youtube");
 Irssi::settings_add_int( $IRSSI{'name'}, 'youtube_freespace', 100 * 1024);
 Irssi::settings_add_bool($IRSSI{'name'}, 'youtube_verbose',   1);
