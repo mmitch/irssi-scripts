@@ -1,4 +1,4 @@
-# $Id: 4chan.pl,v 1.21 2006-11-26 02:27:13 mitch Exp $
+# $Id: 4chan.pl,v 1.22 2006-11-26 02:33:04 mitch Exp $
 #
 # autodownload 4chan (and similar) links before they disappear
 #
@@ -20,8 +20,8 @@ use IO::File;
 use vars qw($VERSION %IRSSI);
 use POSIX qw(strftime);
 
-my $CVSVERSION = do { my @r = (q$Revision: 1.21 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
-my $CVSDATE = (split(/ /, '$Date: 2006-11-26 02:27:13 $'))[1];
+my $CVSVERSION = do { my @r = (q$Revision: 1.22 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+my $CVSDATE = (split(/ /, '$Date: 2006-11-26 02:33:04 $'))[1];
 $VERSION = $CVSVERSION;
 %IRSSI = (
 	authors  	=> 'Christian Garbs',
@@ -249,6 +249,14 @@ sub cmd_save {
     
 }
 
+# save on unload
+sub sig_command_script_unload {
+    my $script = shift;
+    if ($script =~ /(.*\/)?$IRSSI{'name'}(\.pl)?$/) {
+        cmd_save();
+    }
+}
+
 sub cmd_load {
     
     my $filename = Irssi::settings_get_str('4chan_conffile');
@@ -289,6 +297,10 @@ signal_add_first 'default command 4chan' => sub {
 	# gets triggered if called with unknown subcommand
 	cmd_help();
 };
+
+Irssi::signal_add_first('command script load', 'sig_command_script_unload');
+Irssi::signal_add_first('command script unload', 'sig_command_script_unload');
+Irssi::signal_add('setup saved', 'cmd_save');
 
 Irssi::settings_add_bool($IRSSI{'name'}, '4chan_announce',  0);
 Irssi::settings_add_str( $IRSSI{'name'}, '4chan_conffile',  Irssi::get_irssi_dir()."/4chan.cf");

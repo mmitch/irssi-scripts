@@ -1,4 +1,4 @@
-# $Id: youtube.pl,v 1.14 2006-11-26 02:27:02 mitch Exp $
+# $Id: youtube.pl,v 1.15 2006-11-26 02:32:50 mitch Exp $
 #
 # autodownload youtube videos
 #
@@ -23,8 +23,8 @@ use vars qw($VERSION %IRSSI);
 use POSIX qw(strftime);
 use Data::Dumper;
 
-my $CVSVERSION = do { my @r = (q$Revision: 1.14 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
-my $CVSDATE = (split(/ /, '$Date: 2006-11-26 02:27:02 $'))[1];
+my $CVSVERSION = do { my @r = (q$Revision: 1.15 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+my $CVSDATE = (split(/ /, '$Date: 2006-11-26 02:32:50 $'))[1];
 $VERSION = $CVSVERSION;
 %IRSSI = (
 	authors  	=> 'Christian Garbs',
@@ -203,6 +203,14 @@ sub cmd_save {
     
 }
 
+# save on unload
+sub sig_command_script_unload {
+    my $script = shift;
+    if ($script =~ /(.*\/)?$IRSSI{'name'}(\.pl)?$/) {
+	cmd_save();
+    }
+}
+
 sub cmd_load {
     
     my $filename = Irssi::settings_get_str('youtube_conffile');
@@ -241,6 +249,10 @@ signal_add_first 'default command youtube' => sub {
 	# gets triggered if called with unknown subcommand
 	cmd_help();
 };
+
+Irssi::signal_add_first('command script load', 'sig_command_script_unload');
+Irssi::signal_add_first('command script unload', 'sig_command_script_unload');
+Irssi::signal_add('setup saved', 'cmd_save');
 
 Irssi::settings_add_str( $IRSSI{'name'}, 'youtube_conffile',  Irssi::get_irssi_dir()."/youtube.cf");
 Irssi::settings_add_str( $IRSSI{'name'}, 'youtube_downdir',   "$ENV{HOME}/youtube");
