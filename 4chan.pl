@@ -1,4 +1,4 @@
-# $Id: 4chan.pl,v 1.20 2006-11-26 02:25:03 mitch Exp $
+# $Id: 4chan.pl,v 1.21 2006-11-26 02:27:13 mitch Exp $
 #
 # autodownload 4chan (and similar) links before they disappear
 #
@@ -20,8 +20,8 @@ use IO::File;
 use vars qw($VERSION %IRSSI);
 use POSIX qw(strftime);
 
-my $CVSVERSION = do { my @r = (q$Revision: 1.20 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
-my $CVSDATE = (split(/ /, '$Date: 2006-11-26 02:25:03 $'))[1];
+my $CVSVERSION = do { my @r = (q$Revision: 1.21 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+my $CVSDATE = (split(/ /, '$Date: 2006-11-26 02:27:13 $'))[1];
 $VERSION = $CVSVERSION;
 %IRSSI = (
 	authors  	=> 'Christian Garbs',
@@ -292,6 +292,8 @@ signal_add_first 'default command 4chan' => sub {
 
 Irssi::settings_add_bool($IRSSI{'name'}, '4chan_announce',  0);
 Irssi::settings_add_str( $IRSSI{'name'}, '4chan_conffile',  Irssi::get_irssi_dir()."/4chan.cf");
-Irssi::settings_add_str( $IRSSI{'name'}, '4chan_downdir',   "$ENV{HOME}/pub/4chan");
+Irssi::settings_add_str( $IRSSI{'name'}, '4chan_downdir',   "$ENV{HOME}/4chan");
 Irssi::settings_add_int( $IRSSI{'name'}, '4chan_freespace', 100 * 1024);
 Irssi::settings_add_bool($IRSSI{'name'}, '4chan_verbose',   1);
+
+cmd_load();

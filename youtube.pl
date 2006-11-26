@@ -1,4 +1,4 @@
-# $Id: youtube.pl,v 1.13 2006-11-26 02:20:26 mitch Exp $
+# $Id: youtube.pl,v 1.14 2006-11-26 02:27:02 mitch Exp $
 #
 # autodownload youtube videos
 #
@@ -23,8 +23,8 @@ use vars qw($VERSION %IRSSI);
 use POSIX qw(strftime);
 use Data::Dumper;
 
-my $CVSVERSION = do { my @r = (q$Revision: 1.13 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
-my $CVSDATE = (split(/ /, '$Date: 2006-11-26 02:20:26 $'))[1];
+my $CVSVERSION = do { my @r = (q$Revision: 1.14 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+my $CVSDATE = (split(/ /, '$Date: 2006-11-26 02:27:02 $'))[1];
 $VERSION = $CVSVERSION;
 %IRSSI = (
 	authors  	=> 'Christian Garbs',
@@ -47,6 +47,7 @@ $IRSSI{description}
 $IRSSI{authors} <$IRSSI{contact}> $IRSSI{url}
 
 configuration variables:
+/set youtube_conffile   configuration file
 /set youtube_downdir    the download directory
 /set youtube_verbose    show link aquisition
 /set youtube_freespace  minimum space to be free
@@ -211,11 +212,11 @@ sub cmd_load {
 	    chomp $line;
 	    if ($line =~ /^([A-Z]+)\t(.*)$/) {
 		if ($1 eq 'DOWNDIR') {
-		    Irssi::settings_set_str( 'youtube_downdir', $2);
+		    Irssi::settings_set_str( 'youtube_downdir',   $2);
 		} elsif ($1 eq 'FREESPACE') {
 		    Irssi::settings_set_int( 'youtube_freespace', $2);
 		} elsif ($1 eq 'VERBOSE') {
-		    Irssi::settings_set_bool('youtube_verbose', $2);
+		    Irssi::settings_set_bool('youtube_verbose',   $2);
 		  }
 	    }
 	}
@@ -245,3 +246,5 @@ Irssi::settings_add_str( $IRSSI{'name'}, 'youtube_conffile',  Irssi::get_irssi_d
 Irssi::settings_add_str( $IRSSI{'name'}, 'youtube_downdir',   "$ENV{HOME}/youtube");
 Irssi::settings_add_int( $IRSSI{'name'}, 'youtube_freespace', 100 * 1024);
 Irssi::settings_add_bool($IRSSI{'name'}, 'youtube_verbose',   1);
+
+cmd_load();
