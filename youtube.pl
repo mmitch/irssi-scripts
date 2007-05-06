@@ -1,4 +1,4 @@
-# $Id: youtube.pl,v 1.16 2007-05-06 12:16:34 mitch Exp $
+# $Id: youtube.pl,v 1.17 2007-05-06 12:23:48 mitch Exp $
 #
 # autodownload youtube videos
 #
@@ -23,8 +23,8 @@ use vars qw($VERSION %IRSSI);
 use POSIX qw(strftime);
 use Data::Dumper;
 
-my $CVSVERSION = do { my @r = (q$Revision: 1.16 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
-my $CVSDATE = (split(/ /, '$Date: 2007-05-06 12:16:34 $'))[1];
+my $CVSVERSION = do { my @r = (q$Revision: 1.17 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+my $CVSDATE = (split(/ /, '$Date: 2007-05-06 12:23:48 $'))[1];
 $VERSION = $CVSVERSION;
 %IRSSI = (
 	authors  	=> 'Christian Garbs',
@@ -167,7 +167,7 @@ sub check_for_link {
 	    if ($string =~ m/&title=" \+ "([^"]*)"/) {
 		write_debug($witem, "%RC%n xx${1}xx");
 		$videotitle = $1;
-		$videotitle =~ y|/ '"!;:`|_|;
+		$videotitle =~ y|/ |_|;
 		$file .= "_$videotitle";
 	    }
 	    write_debug($witem, "%RD%n xx${request}xx");
@@ -176,6 +176,7 @@ sub check_for_link {
 	    write_debug($witem, "%RE%n xx${downurl}xx");
 	
 	    # write log and download
+	    $file =~ y|'"`*$!?|_|;
 	    my $filename = "$downdir/$file";
 	    my $cmdline = "GET \"$downurl\" > \"${filename}.flv\" &";
 	    write_debug($witem, "%RF%n xx${cmdline}xx");
