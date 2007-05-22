@@ -1,4 +1,4 @@
-# $Id: 4chan.pl,v 1.29 2007-05-17 10:57:11 mitch Exp $
+# $Id: 4chan.pl,v 1.30 2007-05-22 22:54:47 mitch Exp $
 #
 # autodownload 4chan (and similar) links before they disappear
 #
@@ -20,8 +20,8 @@ use IO::File;
 use vars qw($VERSION %IRSSI);
 use POSIX qw(strftime);
 
-my $CVSVERSION = do { my @r = (q$Revision: 1.29 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
-my $CVSDATE = (split(/ /, '$Date: 2007-05-17 10:57:11 $'))[1];
+my $CVSVERSION = do { my @r = (q$Revision: 1.30 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+my $CVSDATE = (split(/ /, '$Date: 2007-05-22 22:54:47 $'))[1];
 $VERSION = $CVSVERSION;
 %IRSSI = (
 	authors  	=> 'Christian Garbs',
@@ -170,6 +170,11 @@ sub check_for_link {
 	$url = $1;
 	$board = $3;
 	$file = $4;
+    } elsif ($message =~ m|(http://z0r.de/\?id=(\d+))|) {
+	$chan = 'z0r';
+	$url = "http://z0r.de/L/$2.swf";
+	$board = '-';
+	$file = "$2.swf";
     }
 
     # download if something was found
