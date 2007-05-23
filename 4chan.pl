@@ -1,4 +1,4 @@
-# $Id: 4chan.pl,v 1.31 2007-05-23 08:40:15 mitch Exp $
+# $Id: 4chan.pl,v 1.32 2007-05-23 20:50:00 mitch Exp $
 #
 # autodownload 4chan (and similar) links before they disappear
 #
@@ -20,8 +20,8 @@ use IO::File;
 use vars qw($VERSION %IRSSI);
 use POSIX qw(strftime);
 
-my $CVSVERSION = do { my @r = (q$Revision: 1.31 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
-my $CVSDATE = (split(/ /, '$Date: 2007-05-23 08:40:15 $'))[1];
+my $CVSVERSION = do { my @r = (q$Revision: 1.32 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+my $CVSDATE = (split(/ /, '$Date: 2007-05-23 20:50:00 $'))[1];
 $VERSION = $CVSVERSION;
 %IRSSI = (
 	authors  	=> 'Christian Garbs',
@@ -144,7 +144,7 @@ sub check_for_link {
     }
 
     # scan for URLs
-    my ($chan, $url, $board, $file);
+    my ($chan, $url, $board, $file, $downurl);
     my $referrer = '';
     if ( $message =~ m|(http://[a-z]+\.4chan[a-z]*\.org/([a-z]+)/src(?:\.cgi)?/(\S+\.[a-z]+))|) {
 	$chan = '4chan';
@@ -174,7 +174,8 @@ sub check_for_link {
 	$file = $4;
     } elsif ($message =~ m|(http://z0r.de/\?id=(\d+))|) {
 	$chan = 'z0r';
-	$url = "http://z0r.de/L/$2.swf";
+	$url = $1;
+	$downurl = "http://z0r.de/L/$2.swf";
 	$referrer = $1;
 	$board = '-';
 	$file = "$2.swf";
@@ -246,7 +247,8 @@ sub check_for_link {
 	    $io->print("CHAN\t$chan\n");
 	    $io->close;
             $referrer = "--referer=$referrer" if ($referrer);
-	    system("wget -U \"$USERAGENT\" \"$referrer\" -qO \"$filename\" \"$url\" &");
+            $downurl = $url unless ($downurl);
+	    system("wget -U \"$USERAGENT\" \"$referrer\" -qO \"$filename\" \"$downurl\" &");
 	    write_verbose($witem, "%R>>%n Saving 4chan link");
 	}
 
