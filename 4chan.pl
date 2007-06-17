@@ -1,4 +1,4 @@
-# $Id: 4chan.pl,v 1.32 2007-05-23 20:50:00 mitch Exp $
+# $Id: 4chan.pl,v 1.33 2007-06-17 11:41:48 mitch Exp $
 #
 # autodownload 4chan (and similar) links before they disappear
 #
@@ -20,8 +20,8 @@ use IO::File;
 use vars qw($VERSION %IRSSI);
 use POSIX qw(strftime);
 
-my $CVSVERSION = do { my @r = (q$Revision: 1.32 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
-my $CVSDATE = (split(/ /, '$Date: 2007-05-23 20:50:00 $'))[1];
+my $CVSVERSION = do { my @r = (q$Revision: 1.33 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+my $CVSDATE = (split(/ /, '$Date: 2007-06-17 11:41:48 $'))[1];
 $VERSION = $CVSVERSION;
 %IRSSI = (
 	authors  	=> 'Christian Garbs',
@@ -146,7 +146,7 @@ sub check_for_link {
     # scan for URLs
     my ($chan, $url, $board, $file, $downurl);
     my $referrer = '';
-    if ( $message =~ m|(http://[a-z]+\.4chan[a-z]*\.org/([a-z]+)/src(?:\.cgi)?/(\S+\.[a-z]+))|) {
+    if ($message =~ m|(http://[a-z]+\.4chan[a-z]*\.org/([a-z]+)/src(?:\.cgi)?/(\S+\.[a-z]+))|) {
 	$chan = '4chan';
 	$url = $1;
 	$board = $2;
@@ -179,6 +179,11 @@ sub check_for_link {
 	$referrer = $1;
 	$board = '-';
 	$file = "$2.swf";
+    } elsif ($message =~ m|(http://[a-z]+\.2chan\.net/([a-z0-9]+)/src/(\S+\.[a-z]+))|) {
+	$chan = '2chan';
+	$url = $1;
+	$board = $2;
+	$file = $3;
     }
 
     # download if something was found
@@ -192,25 +197,31 @@ sub check_for_link {
 	
 	# handle linking sprees
 	if (Irssi::settings_get_bool('4chan_announce')) {
+
+	    my $context;
+	    if ($paramchannel!=-1 && $server->channel_find($signal->[$paramchannel])) {
+		$context = $server->channel_find($signal->[$paramchannel]);
+	    } else {
+		$context = $server;
+	    }
+
 	    if ($last_nick{$channel} eq $nick) {
 		$spree_count{$channel}++;
 	    } else {
+		if ($spree_count{$channel} > 7) {
+		    $context->command('/SAY C-C-C-Combo breaker!');
+		}
 		$spree_count{$channel} = 1;
 		$last_nick{$channel} = $nick;
 	    }
+
 	    if (exists $spree_text{$spree_count{$channel}}) {
 		my $text = $spree_text{$spree_count{$channel}};
 		$text =~ s/NICK/$nick/g;
 		if (! ($text =~ s|\*self\*.\s*|/me |)) {
 		    $text = "/SAY $text";
 		}
-		my $context;
-		if ($paramchannel!=-1 && $server->channel_find($signal->[$paramchannel])) {
-		    $context = $server->channel_find($signal->[$paramchannel]);
-		} else {
-		    $context = $server;
-		}
-		$context->command("$text");
+		$context->command($text);
 	    }
 	}
 
