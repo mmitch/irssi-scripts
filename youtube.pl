@@ -1,8 +1,8 @@
-# $Id: youtube.pl,v 1.17 2007-05-06 12:23:48 mitch Exp $
+# $Id: youtube.pl,v 1.18 2007-06-17 11:43:56 mitch Exp $
 #
 # autodownload youtube videos
 #
-# (c) 2006 by Christian Garbs <mitch@cgarbs,de>
+# (c) 2006-2007 by Christian Garbs <mitch@cgarbs,de>
 # licensed under GNU GPL v2
 #
 # needs GET from libwww-perl
@@ -23,8 +23,8 @@ use vars qw($VERSION %IRSSI);
 use POSIX qw(strftime);
 use Data::Dumper;
 
-my $CVSVERSION = do { my @r = (q$Revision: 1.17 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
-my $CVSDATE = (split(/ /, '$Date: 2007-05-06 12:23:48 $'))[1];
+my $CVSVERSION = do { my @r = (q$Revision: 1.18 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+my $CVSDATE = (split(/ /, '$Date: 2007-06-17 11:43:56 $'))[1];
 $VERSION = $CVSVERSION;
 %IRSSI = (
 	authors  	=> 'Christian Garbs',
