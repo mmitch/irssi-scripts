@@ -1,4 +1,4 @@
-# $Id: 4chan.pl,v 1.33 2007-06-17 11:41:48 mitch Exp $
+# $Id: 4chan.pl,v 1.34 2007-09-22 12:33:03 mitch Exp $
 #
 # autodownload 4chan (and similar) links before they disappear
 #
@@ -11,7 +11,7 @@
 
 #
 # TODO:
-# don't overwrite existing file later with an 404
+# don't overwrite existing file later with a 404
 #
 
 use strict;
@@ -20,8 +20,8 @@ use IO::File;
 use vars qw($VERSION %IRSSI);
 use POSIX qw(strftime);
 
-my $CVSVERSION = do { my @r = (q$Revision: 1.33 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
-my $CVSDATE = (split(/ /, '$Date: 2007-06-17 11:41:48 $'))[1];
+my $CVSVERSION = do { my @r = (q$Revision: 1.34 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+my $CVSDATE = (split(/ /, '$Date: 2007-09-22 12:33:03 $'))[1];
 $VERSION = $CVSVERSION;
 %IRSSI = (
 	authors  	=> 'Christian Garbs',
