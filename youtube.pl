@@ -1,4 +1,4 @@
-# $Id: youtube.pl,v 1.19 2007-07-22 14:09:00 mitch Exp $
+# $Id: youtube.pl,v 1.20 2007-10-27 09:18:17 mitch Exp $
 #
 # autodownload youtube videos
 #
@@ -14,6 +14,7 @@
 #
 # TODO:
 # don't overwrite existing file later with an 404
+# decode HTML entities in video title
 #
 
 use strict;
@@ -23,8 +24,8 @@ use vars qw($VERSION %IRSSI);
 use POSIX qw(strftime);
 use Data::Dumper;
 
-my $CVSVERSION = do { my @r = (q$Revision: 1.19 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
-my $CVSDATE = (split(/ /, '$Date: 2007-07-22 14:09:00 $'))[1];
+my $CVSVERSION = do { my @r = (q$Revision: 1.20 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+my $CVSDATE = (split(/ /, '$Date: 2007-10-27 09:18:17 $'))[1];
 $VERSION = $CVSVERSION;
 %IRSSI = (
 	authors  	=> 'Christian Garbs',
@@ -164,7 +165,14 @@ sub check_for_link {
 	    my $request = $1;
 	    my $videotitle = $file;
 
-	    if ($string =~ m/&title=" \+ "([^"]*)"/) {
+	    if ($string =~ m/&title=(.*)';$/) {
+		write_debug($witem, "%RC%n xx${1}xx");
+		$videotitle = $1;
+		$videotitle =~ s/&\w+;/_/g; # TODO: decode HTML entities
+		$videotitle =~ s/%([[:xdigit:]]{2})/chr hex $1/eg;
+		$videotitle =~ y|/ |_|;
+		$file .= "_$videotitle";
+	    } elsif ($string =~ m/&title=" \+ "([^"]*)"/) {
 		write_debug($witem, "%RC%n xx${1}xx");
 		$videotitle = $1;
 		$videotitle =~ s/%([[:xdigit:]]{2})/chr hex $1/eg;
