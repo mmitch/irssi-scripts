@@ -1,4 +1,4 @@
-# $Id: youtube.pl,v 1.20 2007-10-27 09:18:17 mitch Exp $
+# $Id: youtube.pl,v 1.21 2007-10-28 20:35:04 mitch Exp $
 #
 # autodownload youtube videos
 #
@@ -24,8 +24,8 @@ use vars qw($VERSION %IRSSI);
 use POSIX qw(strftime);
 use Data::Dumper;
 
-my $CVSVERSION = do { my @r = (q$Revision: 1.20 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
-my $CVSDATE = (split(/ /, '$Date: 2007-10-27 09:18:17 $'))[1];
+my $CVSVERSION = do { my @r = (q$Revision: 1.21 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+my $CVSDATE = (split(/ /, '$Date: 2007-10-28 20:35:04 $'))[1];
 $VERSION = $CVSVERSION;
 %IRSSI = (
 	authors  	=> 'Christian Garbs',
@@ -132,6 +132,8 @@ sub check_for_link {
 	$witem = Irssi::window_item_find($target);
     }
 
+    # change weird link format to what we want:
+    $message =~ s|(http://[-a-zA-Z0-9_.]+\.*youtube.com)/v/([-a-zA-Z0-9_]+)|$1/watch?v=$2|g;
 
     if ($message =~ m|(http://([-a-zA-Z0-9_.]+\.)*youtube.com/watch\?(?:.+=.+&)*v=([-a-zA-Z0-9_]+))|) {
 	my $pageurl = $1;
