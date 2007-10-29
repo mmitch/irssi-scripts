@@ -1,4 +1,4 @@
-# $Id: youtube.pl,v 1.21 2007-10-28 20:35:04 mitch Exp $
+# $Id: youtube.pl,v 1.22 2007-10-29 19:18:49 lalufu Exp $
 #
 # autodownload youtube videos
 #
@@ -23,9 +23,10 @@ use IO::File;
 use vars qw($VERSION %IRSSI);
 use POSIX qw(strftime);
 use Data::Dumper;
+use LWP::Simple;
 
-my $CVSVERSION = do { my @r = (q$Revision: 1.21 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
-my $CVSDATE = (split(/ /, '$Date: 2007-10-28 20:35:04 $'))[1];
+my $CVSVERSION = do { my @r = (q$Revision: 1.22 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+my $CVSDATE = (split(/ /, '$Date: 2007-10-29 19:18:49 $'))[1];
 $VERSION = $CVSVERSION;
 %IRSSI = (
 	authors  	=> 'Christian Garbs',
@@ -159,7 +160,12 @@ sub check_for_link {
 	    return;
 	}
 
-	my $string = `GET $pageurl | grep '/watch_fullscreen'`;
+	my $string = get($pageurl);
+	unless(defined($string)) {
+	    write_irssi($witem, "%R>>%n Could not download youtube page!");
+	    return;
+	}
+	($string) = grep {/\/watch_fullscreen/} split(/\n/, $string);
 
         write_debug($witem, "%RA%n $pageurl xx${string}xx");
 	if ($string =~ m/watch_fullscreen\?(.*)&fs/) {
