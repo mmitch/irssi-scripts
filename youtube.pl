@@ -1,4 +1,4 @@
-# $Id: youtube.pl,v 1.22 2007-10-29 19:18:49 lalufu Exp $
+# $Id: youtube.pl,v 1.23 2007-12-01 20:32:04 mitch Exp $
 #
 # autodownload youtube videos
 #
@@ -25,8 +25,8 @@ use POSIX qw(strftime);
 use Data::Dumper;
 use LWP::Simple;
 
-my $CVSVERSION = do { my @r = (q$Revision: 1.22 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
-my $CVSDATE = (split(/ /, '$Date: 2007-10-29 19:18:49 $'))[1];
+my $CVSVERSION = do { my @r = (q$Revision: 1.23 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+my $CVSDATE = (split(/ /, '$Date: 2007-12-01 20:32:04 $'))[1];
 $VERSION = $CVSVERSION;
 %IRSSI = (
 	authors  	=> 'Christian Garbs',
@@ -119,6 +119,14 @@ sub diskfree($) {
     return $size;
 }
 
+sub debug_utf8($$$)
+{
+    my ($witem, $name, $content) = (@_);
+    my $a = utf8::is_utf8($content) ? 'is' : "isn't";
+    my $b = utf8::is_utf8($content) ? 'valid' : 'invalid';
+    write_debug($witem, "%R>>var $name $a UTF8 and $b");
+}
+
 sub check_for_link {
     my ($signal,$parammessage,$paramchannel,$paramnick,$paramserver) = @_;
     my $server = $signal->[$paramserver];
@@ -140,6 +148,9 @@ sub check_for_link {
 	my $pageurl = $1;
       # my $subdomain = $2; (unneeded)
 	my $file = $3;
+
+	debug_utf8($witem, 'pageurl', $pageurl);
+	debug_utf8($witem, 'file', $file);
 
 	# do some checks
 	my $downdir = Irssi::settings_get_str('youtube_downdir');
@@ -167,11 +178,16 @@ sub check_for_link {
 	}
 	($string) = grep {/\/watch_fullscreen/} split(/\n/, $string);
 
+	debug_utf8($witem, 'string', $string);
         write_debug($witem, "%RA%n $pageurl xx${string}xx");
+
 	if ($string =~ m/watch_fullscreen\?(.*)&fs/) {
 	    write_debug($witem, "%RB%n xx${1}xx");
 	    my $request = $1;
 	    my $videotitle = $file;
+
+	    debug_utf8($witem, 'request', $request);
+	    debug_utf8($witem, 'videotitle', $videotitle);
 
 	    if ($string =~ m/&title=(.*)';$/) {
 		write_debug($witem, "%RC%n xx${1}xx");
@@ -190,12 +206,15 @@ sub check_for_link {
 	    write_debug($witem, "%RD%n xx${request}xx");
 
 	    my $downurl = "http://youtube.com/get_video.php?$request";
+	    debug_utf8($witem, 'downurl', $downurl);
 	    write_debug($witem, "%RE%n xx${downurl}xx");
 	
 	    # write log and download
 	    $file =~ y|'"`*$!?|_|;
 	    my $filename = "$downdir/$file";
 	    my $cmdline = "GET \"$downurl\" > \"${filename}.flv\" &";
+	    debug_utf8($witem, 'filename', $filename);
+	    debug_utf8($witem, 'cmdline', $cmdline);
 	    write_debug($witem, "%RF%n xx${cmdline}xx");
 	    system($cmdline);
 	    write_verbose($witem, "%R>>%n Saving youtube $videotitle");
