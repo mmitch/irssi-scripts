@@ -148,7 +148,7 @@ sub check_for_link {
 	$board = $2;
 	$file = $3;
 	$url =~ s|/src.cgi/|/src/|;
-    } elsif ($message =~ m|(http://4chanarchive\.org/images/(?:[a-z]+/)\d+/(\d+\.[a-z]+))|) {
+    } elsif ($message =~ m|(http://4chanarchive\.org/images/(?:[a-z]+/)?\d+/(\d+\.[a-z]+))|) {
 	$chan = '4chanarchive';
 	$url = $1;
 	$board = '?';
