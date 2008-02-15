@@ -152,11 +152,6 @@ sub check_for_link {
 	$board = $2;
 	$file = $3;
 	$url =~ s|/src.cgi/|/src/|;
-#    } elsif ($message =~ m|(http://einskanal.net/images/[0-9]+/(\S+\.[a-z]+))|) {
-#	$chan = 'Einskanal';
-#	$url = $1;
-#	$board = '?';
-#	$file = $2;
     } elsif ($message =~ m|(http://(www.)?krautchan.net/files/(\S+\.[a-z]+))|) {
 	$chan = 'Krautchan';
 	$url = $1;
