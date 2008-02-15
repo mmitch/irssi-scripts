@@ -1,5 +1,3 @@
-# $Id: 4chan.pl,v 1.34 2007-09-22 12:33:03 mitch Exp $
-#
 # autodownload 4chan (and similar) links before they disappear
 #
 # (c) 2006-2007 by Christian Garbs <mitch@cgarbs.de>
@@ -20,9 +18,7 @@ use IO::File;
 use vars qw($VERSION %IRSSI);
 use POSIX qw(strftime);
 
-my $CVSVERSION = do { my @r = (q$Revision: 1.34 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
-my $CVSDATE = (split(/ /, '$Date: 2007-09-22 12:33:03 $'))[1];
-$VERSION = $CVSVERSION;
+$VERSION = '2008-02-15';
 %IRSSI = (
 	authors  	=> 'Christian Garbs',
 	contact  	=> 'mitch@cgarbs.de',
@@ -30,7 +26,7 @@ $VERSION = $CVSVERSION;
 	description 	=> 'autodownload 4chan (and similar) links before they disappear',
 	license 	=> 'GPLv2',
 	url     	=> 'http://www.cgarbs.de/',
-	changed  	=> $CVSDATE,
+	changed  	=> $VERSION,
 );
 my $USERAGENT='Mozilla/4.0 (compatible; MSIE 5.0; Linux) Opera 5.0  [en]';
 
