@@ -1,6 +1,6 @@
 # autodownload 4chan (and similar) links before they disappear
 #
-# (c) 2006-2007 by Christian Garbs <mitch@cgarbs.de>
+# (c) 2006-2008 by Christian Garbs <mitch@cgarbs.de>
 # licensed under GNU GPL v2
 #
 # needs wget
