@@ -142,13 +142,13 @@ sub check_for_link {
     # scan for URLs
     my ($chan, $url, $board, $file, $downurl);
     my $referrer = '';
-    if ($message =~ m|(http://[a-z]+\.4chan[a-z]*\.org/([a-z]+)/src(?:\.cgi)?/(\S+\.[a-z]+))|) {
+    if ($message =~ m|(http://[a-z]+\.4chan[a-z]*\.org/([a-z0-9]+)/src(?:\.cgi)?/(\S+\.[a-z]+))|) {
 	$chan = '4chan';
 	$url = $1;
 	$board = $2;
 	$file = $3;
 	$url =~ s|/src.cgi/|/src/|;
-    } elsif ($message =~ m|(http://4chanarchive\.org/images/(?:[a-z]+/)?\d+/(\d+\.[a-z]+))|) {
+    } elsif ($message =~ m|(http://4chanarchive\.org/images/(?:a-z0-9]+/)?\d+/(\d+\.[a-z]+))|) {
 	$chan = '4chanarchive';
 	$url = $1;
 	$board = '?';
