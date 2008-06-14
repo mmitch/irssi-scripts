@@ -186,6 +186,11 @@ sub check_for_link {
 	$url = $1;
 	$board = $2;
 	$file = $3;
+    } elsif ($message =~ m|(http://[a-z]+\.gurochan\.net/([a-z0-9]+)/src/(\S+\.[a-z]+))|) {
+	$chan = 'gurochan';
+	$url = $1;
+	$board = $2;
+	$file = $3;
     } elsif ($message =~ m|(http://.*mexx\.onlinewelten\.com)/.*fotos/(\d+)/(\d+)/(\d+)(\.gross)?\.jpg|) {
 	$chan = 'animexx';
 	$url = "$1/fotos/$2/$3/$4.gross.jpg";
