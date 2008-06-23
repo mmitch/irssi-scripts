@@ -154,6 +154,11 @@ sub check_for_link {
 	$url = $1;
 	$board = '?';
 	$file = $2;
+    } elsif ($message =~ m|(http://img\.fapchan\.org/([a-z0-9]+)/src/(\S+\.[a-z]+))|) {
+	$chan = 'fapchan';
+	$url = $1;
+	$board = $2;
+	$file = $3;
     } elsif ($message =~ m|(http://(www.)?krautchan.net/files/(\S+\.[a-z]+))|) {
 	$chan = 'Krautchan';
 	$url = $1;
