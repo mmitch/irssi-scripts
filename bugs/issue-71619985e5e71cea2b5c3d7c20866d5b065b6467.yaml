@@ -1,0 +1,20 @@
+--- !ditz.rubyforge.org,2008-03-06/issue 
+title: "dark roasted blend: error"
+desc: |-
+  http://lh6.ggpht.com/abramsv/SH5uUQDS96I/AAAAAAAAVkM/-Db0k5Cr1VY/s800/xxxxxxxx.jpg
+  regexp does not get this image
+type: :bugfix
+component: 4chan
+release: 
+reporter: Christian Garbs <mitch@cgarbs.de>
+status: :unstarted
+disposition: 
+creation_time: 2008-07-20 19:43:26.736126 Z
+references: []
+
+id: 71619985e5e71cea2b5c3d7c20866d5b065b6467
+log_events: 
+- - 2008-07-20 19:43:27.928848 Z
+  - Christian Garbs <mitch@cgarbs.de>
+  - created
+  - ""
