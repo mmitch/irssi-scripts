@@ -1,0 +1,10 @@
+--- !ditz.rubyforge.org,2008-03-06/project 
+name: irssi-scripts
+version: "0.3"
+components: 
+- !ditz.rubyforge.org,2008-03-06/component 
+  name: irssi-scripts
+- !ditz.rubyforge.org,2008-03-06/component 
+  name: 4chan
+releases: []
+
