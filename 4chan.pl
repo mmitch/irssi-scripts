@@ -209,6 +209,13 @@ sub check_for_link {
 	$url = "$1$2";
 	$board = '-';
 	$file = $3;
+    } elsif ($message =~ m|(http://rule63.nerdramblingz.com/index.php\?q=/post/view/(\d+))|) {
+	$chan = 'rule#63';
+	$url = $1;
+	$referrer = $url;
+	$board = '-';
+	$downurl = "http://rule63.nerdramblingz.com/index.php?q=/image/$2.jpg";
+	$file = "r63_$2.jpg";
     } elsif ($message =~ m|(http://rule34.paheal.net/post/view/\d+)|) {
 	$chan = 'rule#34';
 	$url = $1;
@@ -217,7 +224,7 @@ sub check_for_link {
 	$downurl = `GET "$1" | grep "<img.*id='main_image'" | sed -e "s|^.*src='||" -e "s/'.*\$//"`;
 	chomp $downurl;
 	$file = $downurl;
-	$file =~ s|^.*/(\d+).*(\.[a-z]+)$|$1$2|;
+	$file =~ s|^.*/(\d+).*(\.[a-z]+)$|r34_$1$2|;
     }
 
 #    write_debug($witem, '$chan='.$chan);
