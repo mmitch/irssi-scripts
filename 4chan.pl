@@ -142,6 +142,7 @@ sub check_for_link {
     # scan for URLs
     my ($chan, $url, $board, $file, $downurl);
     my $referrer = '';
+    study $message;
     if ($message =~ m|(http://[a-z]+\.4chan[a-z]*\.org/([a-z0-9]+)/src(?:\.cgi)?/(?:cb-nws/)?(\S+\.[a-z]+))|) {
 	$chan = '4chan';
 	$url = $1;
