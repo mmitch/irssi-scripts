@@ -5,8 +5,8 @@ type: :feature
 component: 4chan
 release: 
 reporter: Christian Garbs <mitch@cgarbs.de>
-status: :unstarted
-disposition: 
+status: :closed
+disposition: :fixed
 creation_time: 2008-12-31 12:55:02.002355 Z
 references: []
 
@@ -15,4 +15,8 @@ log_events:
 - - 2008-12-31 12:55:03.337081 Z
   - Christian Garbs <mitch@cgarbs.de>
   - created
+  - ""
+- - 2008-12-31 14:32:11.800124 Z
+  - Christian Garbs <mitch@cgarbs.de>
+  - closed with disposition fixed
   - ""
