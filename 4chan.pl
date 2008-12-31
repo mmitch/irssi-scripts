@@ -206,7 +206,23 @@ sub check_for_link {
 	$url = "$1$2";
 	$board = '-';
 	$file = $3;
+    } elsif ($message =~ m|(http://rule34.paheal.net/post/view/\d+)|) {
+	$chan = 'rule#34';
+	$url = $1;
+	$referrer = $url;
+	$board = '-';
+	$downurl = `GET "$1" | grep "<img.*id='main_image'" | sed -e "s|^.*src='||" -e "s/'.*\$//"`;
+	chomp $downurl;
+	$file = $downurl;
+	$file =~ s|^.*/(\d+).*(\.[a-z]+)$|$1$2|;
     }
+
+#    write_debug($witem, '$chan='.$chan);
+#    write_debug($witem, '$board='.$board);
+#    write_debug($witem, '$file='.$file);
+#    write_debug($witem, '$url='.$url);
+#    write_debug($witem, '$downurl='.$downurl);
+#    write_debug($witem, '$referrer='.$referrer);
 
     # download if something was found
     if (defined $chan) {
@@ -279,7 +295,7 @@ sub check_for_link {
 	    $io->print("TIME\t$now\n");
 	    $io->print("CHAN\t$chan\n");
 	    $io->close;
-            $referrer = "--referer=$referrer" if ($referrer);
+            $referrer = "--referer=\"$referrer\"" if ($referrer);
             $downurl = $url unless ($downurl);
 	    system("wget -U \"$USERAGENT\" \"$referrer\" -qO \"$filename\" \"$downurl\" &");
 	    write_verbose($witem, "%R>>%n Saving 4chan link");
