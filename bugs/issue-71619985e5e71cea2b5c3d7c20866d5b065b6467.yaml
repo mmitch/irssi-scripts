@@ -7,8 +7,8 @@ type: :bugfix
 component: 4chan
 release: 
 reporter: Christian Garbs <mitch@cgarbs.de>
-status: :unstarted
-disposition: 
+status: :closed
+disposition: :fixed
 creation_time: 2008-07-20 19:43:26.736126 Z
 references: []
 
@@ -17,4 +17,12 @@ log_events:
 - - 2008-07-20 19:43:27.928848 Z
   - Christian Garbs <mitch@cgarbs.de>
   - created
+  - ""
+- - 2009-03-03 21:46:17.649075 Z
+  - Christian Garbs <mitch@cgarbs.de>
+  - changed status from unstarted to in_progress
+  - ""
+- - 2009-03-03 21:54:15.302987 Z
+  - Christian Garbs <mitch@cgarbs.de>
+  - closed with disposition fixed
   - ""

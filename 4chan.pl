@@ -1,6 +1,6 @@
 # autodownload 4chan (and similar) links before they disappear
 #
-# (c) 2006-2008 by Christian Garbs <mitch@cgarbs.de>
+# (c) 2006-2009 by Christian Garbs <mitch@cgarbs.de>
 # licensed under GNU GPL v2
 #
 # needs wget
@@ -204,7 +204,7 @@ sub check_for_link {
 	$url = "$1/fotos/$2/$3/$4.gross.jpg";
 	$board = '-';
 	$file = "$2_$3_$4.jpg";
-    } elsif ($message =~ m|(http://lh\d\.\S+\.\S+/abramsv/\S{11}/\S{11}/\S{11}/s1600)-h(/(\S+.jpg))|) {
+    } elsif ($message =~ m|(http://lh\d\.\S+\.\S+/abramsv/\S{11}/\S{11}/\S{11}/s.+)(/(\S+.jpg))|) {
 	$chan = 'Dark Roasted Blend';
 	$url = "$1$2";
 	$board = '-';
