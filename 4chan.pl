@@ -7,18 +7,13 @@
 #
 # based on trigger.pl by Wouter Coekaerts <wouter@coekaerts.be>
 
-#
-# TODO:
-# don't overwrite existing file later with a 404
-#
-
 use strict;
 use Irssi 20020324 qw (command_bind command_runsub signal_add_first signal_add_last);
 use IO::File;
 use vars qw($VERSION %IRSSI);
 use POSIX qw(strftime);
 
-$VERSION = '2008-06-23';
+$VERSION = '2009-03-03';
 %IRSSI = (
 	authors  	=> 'Christian Garbs',
 	contact  	=> 'mitch@cgarbs.de',
