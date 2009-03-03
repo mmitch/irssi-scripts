@@ -301,8 +301,9 @@ sub check_for_link {
 	    $io->print("CHAN\t$chan\n");
 	    $io->close;
             $referrer = "--referer=\"$referrer\"" if ($referrer);
+	    my $tmp = '.tmp.' . (time%10000) . int(rand(100)); # self /query creates duplicate downloads!
             $downurl = $url unless ($downurl);
-	    system("wget -U \"$USERAGENT\" \"$referrer\" -qO \"$filename\" \"$downurl\" &");
+	    system("( wget -U \"$USERAGENT\" $referrer -qO \"$filename\"$tmp \"$downurl\" && mv \"$filename\"$tmp \"$filename\" || rm -f \"$filename\"$tmp ) &");
 	    write_verbose($witem, "%R>>%n Saving 4chan link");
 	}
 
