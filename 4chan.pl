@@ -9,11 +9,12 @@
 
 use strict;
 use Irssi 20020324 qw (command_bind command_runsub signal_add_first signal_add_last);
+use File::Temp qw(tempfile);
 use IO::File;
 use vars qw($VERSION %IRSSI);
 use POSIX qw(strftime);
 
-$VERSION = '2009-03-03';
+$VERSION = '2009-03-06';
 %IRSSI = (
 	authors  	=> 'Christian Garbs',
 	contact  	=> 'mitch@cgarbs.de',
@@ -301,9 +302,9 @@ sub check_for_link {
 	    $io->print("CHAN\t$chan\n");
 	    $io->close;
             $referrer = "--referer=\"$referrer\"" if ($referrer);
-	    my $tmp = '.tmp.' . (time%10000) . int(rand(100)); # self /query creates duplicate downloads!
+	    my (undef, $tmpfile) = tempfile('4chan.tmp.XXXXXXXXXXXX', DIR => $downdir);
             $downurl = $url unless ($downurl);
-	    system("( wget -U \"$USERAGENT\" $referrer -qO \"$filename\"$tmp \"$downurl\" && mv \"$filename\"$tmp \"$filename\" || rm -f \"$filename\"$tmp ) &");
+	    system("( wget -U \"$USERAGENT\" $referrer -qO \"$tmpfile\" \"$downurl\" && mv \"$tmpfile\" \"$filename\" || rm -f \"$tmpfile\" ) &");
 	    write_verbose($witem, "%R>>%n Saving 4chan link");
 	}
 
