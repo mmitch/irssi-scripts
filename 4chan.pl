@@ -304,7 +304,7 @@ sub check_for_link {
             $referrer = "--referer=\"$referrer\"" if ($referrer);
 	    my (undef, $tmpfile) = tempfile('4chan.tmp.XXXXXXXXXXXX', DIR => $downdir);
             $downurl = $url unless ($downurl);
-	    system("( wget -U \"$USERAGENT\" $referrer -qO \"$tmpfile\" \"$downurl\" && mv \"$tmpfile\" \"$filename\" || rm -f \"$tmpfile\" ) &");
+	    system("( wget -U \"$USERAGENT\" $referrer -qO \"$tmpfile\" \"$downurl\" && mv \"$tmpfile\" \"$filename\" && chmod =rw \"$filename\" || rm -f \"$tmpfile\" ) &");
 	    write_verbose($witem, "%R>>%n Saving 4chan link");
 	}
 
