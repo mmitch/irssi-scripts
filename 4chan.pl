@@ -1,6 +1,6 @@
 # autodownload 4chan (and similar) links before they disappear
 #
-# (c) 2006-2009 by Christian Garbs <mitch@cgarbs.de>
+# Copyright (C) 2006-2009  Christian Garbs <mitch@cgarbs.de>
 # licensed under GNU GPL v2
 #
 # needs wget
@@ -14,7 +14,7 @@ use IO::File;
 use vars qw($VERSION %IRSSI);
 use POSIX qw(strftime);
 
-$VERSION = '2009-03-06';
+$VERSION = '2009-07-25';
 %IRSSI = (
 	authors  	=> 'Christian Garbs',
 	contact  	=> 'mitch@cgarbs.de',
@@ -221,6 +221,17 @@ sub check_for_link {
 	chomp $downurl;
 	$file = $downurl;
 	$file =~ s|^.*/(\d+).*(\.[a-z]+)$|r34_$1$2|;
+    } elsif ($message =~ m|(http://wurstball.de/(\d+)/)|) {
+	$chan = 'wurstball';
+	$url = $1;
+	$referrer = $url;
+	my $number = $2;
+	$board = '-';
+	$downurl = `GET "$1" | grep '<img.*src="http://wurstball.de/static/ircview/pictures/' | sed -e 's|^.*http://|http://|' -e 's|".*||'`;
+	chomp $downurl;
+	$file = $downurl;
+	$file =~ s|^.*\.|.|;
+	$file = $number . $file;
     }
 
 #    write_debug($witem, '$chan='.$chan);
