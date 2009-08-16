@@ -14,7 +14,7 @@ use IO::File;
 use vars qw($VERSION %IRSSI);
 use POSIX qw(strftime);
 
-$VERSION = '2009-07-25';
+$VERSION = '2009-08-16';
 %IRSSI = (
 	authors  	=> 'Christian Garbs',
 	contact  	=> 'mitch@cgarbs.de',
@@ -232,6 +232,14 @@ sub check_for_link {
 	$file = $downurl;
 	$file =~ s|^.*\.|.|;
 	$file = $number . $file;
+    } elsif ($message =~ m|(http://pics.nase-bohren.de/(.*\.jpg))|) {
+	$chan = 'nase-bohren';
+	$url = $1;
+	$referrer = 'http://pics.nase-bohren.de/';
+	$board = '-';
+	$file = $2;
+	$downurl = $referrer . `GET "$url" | grep 'alt="$file' | sed -e 's/^.*src="//' -e 's/".*//'`;
+	chomp $downurl;
     }
 
 #    write_debug($witem, '$chan='.$chan);
