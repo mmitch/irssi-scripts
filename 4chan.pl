@@ -148,7 +148,12 @@ sub check_for_link {
 	$file = $3;
 	$url =~ s|/src.cgi/|/src/|;
 	$url =~ s|/src/cb-news/|/src/|;
-    } elsif ($message =~ m|(http://4chanarchive\.org/images/(?:a-z0-9]+/)?\d+/(\d+\.[a-z]+))|) {
+    } elsif ($message =~ m|(http://4chanarchive\.org/images/([a-z0-9]+)/\d+/(\d+\.[a-z]+))|) {
+	$chan = '4chanarchive';
+	$url = $1;
+	$board = $2;
+	$file = $3;
+    } elsif ($message =~ m|(http://4chanarchive\.org/images/\d+/(\d+\.[a-z]+))|) { # still needed?
 	$chan = '4chanarchive';
 	$url = $1;
 	$board = '?';
