@@ -14,7 +14,7 @@ use IO::File;
 use vars qw($VERSION %IRSSI);
 use POSIX qw(strftime);
 
-$VERSION = '2009-11-26';
+$VERSION = '2009-12-13';
 %IRSSI = (
 	authors  	=> 'Christian Garbs',
 	contact  	=> 'mitch@cgarbs.de',
@@ -245,14 +245,21 @@ sub check_for_link {
 	$file = $2;
 	$downurl = $referrer . `GET "$url" | grep 'alt="$file' | sed -e 's/^.*src="//' -e 's/".*//'`;
 	chomp $downurl;
+    } elsif ($message =~ m;(http://www.fukung.net/v/(\d+)/(.*\.(?:jpg|gif)));) {
+	$chan = 'fukung.net';
+	$url = $1;
+	$referrer = $1;
+	$board = '-';
+	$file = $3;
+	$downurl = "http://media.fukung.net/images/$2/$3";
     }
 
-#    write_debug($witem, '$chan='.$chan);
-#    write_debug($witem, '$board='.$board);
-#    write_debug($witem, '$file='.$file);
-#    write_debug($witem, '$url='.$url);
-#    write_debug($witem, '$downurl='.$downurl);
-#    write_debug($witem, '$referrer='.$referrer);
+    write_debug($witem, '$chan='.$chan);
+    write_debug($witem, '$board='.$board);
+    write_debug($witem, '$file='.$file);
+    write_debug($witem, '$url='.$url);
+    write_debug($witem, '$downurl='.$downurl);
+    write_debug($witem, '$referrer='.$referrer);
 
     # download if something was found
     if (defined $chan) {
