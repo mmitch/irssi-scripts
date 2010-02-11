@@ -245,7 +245,7 @@ sub check_for_link {
 	$file = $2;
 	$downurl = $referrer . `GET "$url" | grep 'alt="$file' | sed -e 's/^.*src="//' -e 's/".*//'`;
 	chomp $downurl;
-    } elsif ($message =~ m;(http://www.fukung.net/v/(\d+)/(.*\.(?:jpg|gif|png)));) {
+    } elsif ($message =~ m;(http://(?:www\.)?fukung\.net/v/(\d+)/(.+\.(?:jpg|gif|png)));) {
 	$chan = 'fukung.net';
 	$url = $1;
 	$referrer = $1;
