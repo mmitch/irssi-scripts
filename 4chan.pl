@@ -1,6 +1,6 @@
 # autodownload 4chan (and similar) links before they disappear
 #
-# Copyright (C) 2006-2009  Christian Garbs <mitch@cgarbs.de>
+# Copyright (C) 2006-2010  Christian Garbs <mitch@cgarbs.de>
 # licensed under GNU GPL v2
 #
 # needs wget
@@ -14,7 +14,7 @@ use IO::File;
 use vars qw($VERSION %IRSSI);
 use POSIX qw(strftime);
 
-$VERSION = '2009-12-13';
+$VERSION = '2010-02-11';
 %IRSSI = (
 	authors  	=> 'Christian Garbs',
 	contact  	=> 'mitch@cgarbs.de',
