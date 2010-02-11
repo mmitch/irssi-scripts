@@ -237,7 +237,7 @@ sub check_for_link {
 	$file = $downurl;
 	$file =~ s|^.*\.|.|;
 	$file = $number . $file;
-    } elsif ($message =~ m;(http://pics.nase-bohren.de/(.*\.(?:jpg|gif)));) {
+    } elsif ($message =~ m;(http://pics.nase-bohren.de/(.*\.(?:jpg|gif|png)));) {
 	$chan = 'nase-bohren';
 	$url = $1;
 	$referrer = 'http://pics.nase-bohren.de/';
