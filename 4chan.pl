@@ -27,7 +27,7 @@ $VERSION = '2010-02-11';
 my $USERAGENT='Mozilla/4.0 (compatible; MSIE 5.0; Linux) Opera 5.0  [en]';
 
 # activate debug here
-my $debug = 0;
+my $debug = 1;
 
 ## TODO help does not work
 sub cmd_help {
@@ -252,6 +252,14 @@ sub check_for_link {
 	$board = '-';
 	$file = $3;
 	$downurl = "http://media.fukung.net/images/$2/$3";
+    } elsif ($message =~ m;((http://(?:www\.)?ircz\.de)/\d+);) {
+	$chan = 'ircz.de';
+	$url = $1;
+	$referrer = $1;
+	$board = '-';
+	$file = `GET "$url" | grep 'src="/static/pics/' | sed -e 's,^.*src="/static/pics/,/static/pics/,' -e 's,".*,,'`;
+	$downurl =  $2 . $file;
+	$file =~ s,^.*/,,;
     }
 
     write_debug($witem, '$chan='.$chan);
