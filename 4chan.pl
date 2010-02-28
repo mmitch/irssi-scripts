@@ -3,7 +3,7 @@
 # Copyright (C) 2006-2010  Christian Garbs <mitch@cgarbs.de>
 # licensed under GNU GPL v2
 #
-# needs wget
+# needs wget and the LWP modules
 #
 # based on trigger.pl by Wouter Coekaerts <wouter@coekaerts.be>
 
@@ -14,7 +14,10 @@ use IO::File;
 use vars qw($VERSION %IRSSI);
 use POSIX qw(strftime);
 
-$VERSION = '2010-02-11';
+use LWP::UserAgent;
+use HTTP::Cookies;
+
+$VERSION = '2010-02-28';
 %IRSSI = (
 	authors  	=> 'Christian Garbs',
 	contact  	=> 'mitch@cgarbs.de',
@@ -27,7 +30,7 @@ $VERSION = '2010-02-11';
 my $USERAGENT='Mozilla/4.0 (compatible; MSIE 5.0; Linux) Opera 5.0  [en]';
 
 # activate debug here
-my $debug = 1;
+my $debug = 0;
 
 ## TODO help does not work
 sub cmd_help {
@@ -253,13 +256,27 @@ sub check_for_link {
 	$file = $3;
 	$downurl = "http://media.fukung.net/images/$2/$3";
     } elsif ($message =~ m;((http://(?:www\.)?ircz\.de)/\d+);) {
-	$chan = 'ircz.de';
+
 	$url = $1;
 	$referrer = $1;
 	$board = '-';
-	$file = `GET "$url" | grep 'src="/static/pics/' | sed -e 's,^.*src="/static/pics/,/static/pics/,' -e 's,".*,,'`;
-	$downurl =  $2 . $file;
-	$file =~ s,^.*/,,;
+	$downurl =  $2;
+
+	# needs login cookie
+	# TODO: cache this!
+	my $ua = LWP::UserAgent->new('agent' => 'Mozilla/5.0');
+	my $jar = HTTP::Cookies->new();
+	$ua->cookie_jar($jar);
+	$ua->post('http://ircz.de', {'wat' => 'yes'});
+	my $response = $ua->get($url);
+	my $t = $response->header('title');
+	write_debug($witem, '$t='.$t);
+	if ($t =~ m/\((.*)\)/) {
+	    $chan = 'ircz.de';
+	    $file = "/static/$1";
+	    $downurl .= $file;
+	    $file =~ s,^.*/,,;
+	}
     }
 
     write_debug($witem, '$chan='.$chan);
