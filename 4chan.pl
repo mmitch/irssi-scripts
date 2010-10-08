@@ -255,7 +255,7 @@ sub check_for_link {
 	$board = '-';
 	$file = $3;
 	$downurl = "http://media.fukung.net/images/$2/$3";
-    } elsif ($message =~ m;((http://(?:www\.)?ircz\.de)/\d+);) {
+    } elsif ($message =~ m;((http://(?:www\.)?ircz\.de)/(?:p/)?[0-9a-z]+);) {
 
 	$url = $1;
 	$referrer = $1;
@@ -269,11 +269,9 @@ sub check_for_link {
 	$ua->cookie_jar($jar);
 	$ua->post('http://ircz.de', {'wat' => 'yes'});
 	my $response = $ua->get($url);
-	my $t = $response->header('title');
-	write_debug($witem, '$t='.$t);
-	if ($t =~ m/\((.*)\)/) {
+	if ($response->content() =~ /<img id="pic".*src="([^"]+)"/) {
 	    $chan = 'ircz.de';
-	    $file = "/static/$1";
+	    $file = $1;
 	    $downurl .= $file;
 	    $file =~ s,^.*/,,;
 	}
