@@ -255,6 +255,18 @@ sub check_for_link {
 	$board = '-';
 	$file = $3;
 	$downurl = "http://media.fukung.net/images/$2/$3";
+    } elsif ($message =~ m;(http://naurunappula.com/\d+/(.+?\.(?:jpg|gif|png)));) {
+	$chan = 'naurunappula';
+	$url = $1;
+	$referrer = $1;
+	$board = '-';
+	$file = $2;
+	$downurl = `GET "$url" | grep -B 1 "document.write('nappula" `;
+	$downurl =~ s/document.write\('//g;
+	$downurl =~ s/'\);//g;
+	$downurl =~ tr/\012//d;
+	$downurl =~ s/^.*?"//;
+	$downurl =~ s/".*?$//;
     } elsif ($message =~ m;((http://(?:www\.)?ircz\.de)/(?:p/)?[0-9a-z]+);) {
 
 	$url = $1;
