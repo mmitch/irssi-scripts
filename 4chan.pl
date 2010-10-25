@@ -261,11 +261,11 @@ sub check_for_link {
 	$referrer = $1;
 	$board = '-';
 	$file = $2;
-	$downurl = `GET "$url" | grep -B 1 "document.write('nappula" `;
+	$downurl = `GET "$url" | grep -B 1 "document.write('.*/nn/" `;
 	$downurl =~ s/document.write\('//g;
 	$downurl =~ s/'\);//g;
 	$downurl =~ tr/\012//d;
-	$downurl =~ s/^.*?"//;
+	$downurl =~ s/^.*?src="//;
 	$downurl =~ s/".*?$//;
     } elsif ($message =~ m;((http://(?:www\.)?ircz\.de)/(?:p/)?[0-9a-z]+);) {
 
