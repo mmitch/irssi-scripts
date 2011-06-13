@@ -411,7 +411,7 @@ sub check_for_link {
 	last if ++$count > $maxcount;
     }
 
-    while ($message =~ m|(http://(?:www\.)?wurstball.de/(\d+)/)|g) {
+    while ($message =~ m|(http://(?:www\.)?wurstball\.de/(\d+)/)|g) {
 	$chan = 'wurstball';
 	$url = $1;
 	$referrer = $url;
