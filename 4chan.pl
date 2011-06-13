@@ -233,6 +233,9 @@ sub check_for_link {
     study $message;
     return if $message =~ m|/nosave|;
 
+    my ($maxcount, $count) = (32, 0);
+    
+
     while ($message =~ m|(http://[a-z]+\.4chan[a-z]*\.org/([a-z0-9]+)/src(?:\.cgi)?/(?:cb-nws/)?(\S+\.[a-z]+))|g) {
 	$chan = '4chan';
 	$url = $1;
@@ -243,6 +246,7 @@ sub check_for_link {
 
 	download_it($chan, $board, $file, $url, $downurl, $referrer,
 		    $witem, $paramchannel, $paramnick, $signal, $server);
+	last if ++$count > $maxcount;
     }
 
     while ($message =~ m|(http://4chanarchive\.org/images/([a-z0-9]+)/\d+/(\d+\.[a-z]+))|g) {
@@ -253,6 +257,7 @@ sub check_for_link {
 
 	download_it($chan, $board, $file, $url, $downurl, $referrer,
 		    $witem, $paramchannel, $paramnick, $signal, $server);
+	last if ++$count > $maxcount;
     }
 
     while ($message =~ m|(http://4chanarchive\.org/images/\d+/(\d+\.[a-z]+))|g) { # still needed?
@@ -263,6 +268,7 @@ sub check_for_link {
 
 	download_it($chan, $board, $file, $url, $downurl, $referrer,
 		    $witem, $paramchannel, $paramnick, $signal, $server);
+	last if ++$count > $maxcount;
     }
 
     while ($message =~ m|(http://img\.fapchan\.org/([a-z0-9]+)/src/(\S+\.[a-z]+))|g) {
@@ -273,6 +279,7 @@ sub check_for_link {
 
 	download_it($chan, $board, $file, $url, $downurl, $referrer,
 		    $witem, $paramchannel, $paramnick, $signal, $server);
+	last if ++$count > $maxcount;
     } 
 
     while ($message =~ m|(http://(www.)?krautchan.net/files/(\S+\.[a-z]+))|g) {
@@ -283,6 +290,7 @@ sub check_for_link {
 
 	download_it($chan, $board, $file, $url, $downurl, $referrer,
 		    $witem, $paramchannel, $paramnick, $signal, $server);
+	last if ++$count > $maxcount;
     }
 
     while  ($message =~ m|(http://(www.)?krautchan.net/download.pl/(\S+\.[a-z]+)/)|g) {
@@ -293,6 +301,7 @@ sub check_for_link {
 
 	download_it($chan, $board, $file, $url, $downurl, $referrer,
 		    $witem, $paramchannel, $paramnick, $signal, $server);
+	last if ++$count > $maxcount;
     } 
 
     while ($message =~ m|(http://i.somethingawful.com/(.*/)?([^/]+)/(\S+\.[a-z]+))|g) {
@@ -303,6 +312,7 @@ sub check_for_link {
 
 	download_it($chan, $board, $file, $url, $downurl, $referrer,
 		    $witem, $paramchannel, $paramnick, $signal, $server);
+	last if ++$count > $maxcount;
     }
 
     while ($message =~ m|(http://z0r.de/\?id=(\d+))|g) {
@@ -315,6 +325,7 @@ sub check_for_link {
 
 	download_it($chan, $board, $file, $url, $downurl, $referrer,
 		    $witem, $paramchannel, $paramnick, $signal, $server);
+	last if ++$count > $maxcount;
     }
 
     while ($message =~ m|(http://[a-z]+\.2chan\.net/([a-z0-9]+)/src/(\S+\.[a-z]+))|g) {
@@ -325,6 +336,7 @@ sub check_for_link {
 
 	download_it($chan, $board, $file, $url, $downurl, $referrer,
 		    $witem, $paramchannel, $paramnick, $signal, $server);
+	last if ++$count > $maxcount;
     }
 
     while ($message =~ m|(http://[a-z]+\.7chan\.org/([a-z0-9]+)/src/(\S+\.[a-z]+))|g) {
@@ -335,6 +347,7 @@ sub check_for_link {
 
 	download_it($chan, $board, $file, $url, $downurl, $referrer,
 		    $witem, $paramchannel, $paramnick, $signal, $server);
+	last if ++$count > $maxcount;
     }
 
     while ($message =~ m|(http://[a-z]+\.gurochan\.net/([a-z0-9]+)/src/(\S+\.[a-z]+))|g) {
@@ -345,6 +358,7 @@ sub check_for_link {
 
 	download_it($chan, $board, $file, $url, $downurl, $referrer,
 		    $witem, $paramchannel, $paramnick, $signal, $server);
+	last if ++$count > $maxcount;
     }
 
     while ($message =~ m|(http://.*mexx\.onlinewelten\.com)/.*fotos/(\d+)/(\d+)/(\d+)(\.gross)?\.jpg|g) {
@@ -355,6 +369,7 @@ sub check_for_link {
 
 	download_it($chan, $board, $file, $url, $downurl, $referrer,
 		    $witem, $paramchannel, $paramnick, $signal, $server);
+	last if ++$count > $maxcount;
     }
 
     while ($message =~ m|(http://lh\d\.\S+\.\S+/abramsv/\S{11}/\S{11}/\S{11}/s.+)(/(\S+.jpg))|g) {
@@ -365,6 +380,7 @@ sub check_for_link {
 
 	download_it($chan, $board, $file, $url, $downurl, $referrer,
 		    $witem, $paramchannel, $paramnick, $signal, $server);
+	last if ++$count > $maxcount;
     }
 
     while ($message =~ m|(http://rule63.nerdramblingz.com/index.php\?q=/post/view/(\d+))|g) {
@@ -377,6 +393,7 @@ sub check_for_link {
 
 	download_it($chan, $board, $file, $url, $downurl, $referrer,
 		    $witem, $paramchannel, $paramnick, $signal, $server);
+	last if ++$count > $maxcount;
     }
 
     while ($message =~ m|(http://rule34.paheal.net/post/view/\d+)|g) {
@@ -391,6 +408,7 @@ sub check_for_link {
 
 	download_it($chan, $board, $file, $url, $downurl, $referrer,
 		    $witem, $paramchannel, $paramnick, $signal, $server);
+	last if ++$count > $maxcount;
     }
 
     while ($message =~ m|(http://(?:www\.)?wurstball.de/(\d+)/)|g) {
@@ -407,6 +425,7 @@ sub check_for_link {
 
 	download_it($chan, $board, $file, $url, $downurl, $referrer,
 		    $witem, $paramchannel, $paramnick, $signal, $server);
+	last if ++$count > $maxcount;
     }
 
     while ($message =~ m;(http://pics.nase-bohren.de/(.*\.(?:jpg|gif|png)));g) {
@@ -420,6 +439,7 @@ sub check_for_link {
 
 	download_it($chan, $board, $file, $url, $downurl, $referrer,
 		    $witem, $paramchannel, $paramnick, $signal, $server);
+	last if ++$count > $maxcount;
     }
 
     while ($message =~ m;(http://(?:www\.)?fukung\.net/v/(\d+)/(.+\.(?:jpg|gif|png)));g) {
@@ -432,6 +452,7 @@ sub check_for_link {
 
 	download_it($chan, $board, $file, $url, $downurl, $referrer,
 		    $witem, $paramchannel, $paramnick, $signal, $server);
+	last if ++$count > $maxcount;
     }
 
     while ($message =~ m;(http://naurunappula.com/\d+/(.+?\.(?:jpg|gif|png)));g) {
@@ -449,6 +470,7 @@ sub check_for_link {
 
 	download_it($chan, $board, $file, $url, $downurl, $referrer,
 		    $witem, $paramchannel, $paramnick, $signal, $server);
+	last if ++$count > $maxcount;
     }
 
     while ($message =~ m;((http://(?:www\.)?ircz\.de)/(?:p/)?[0-9a-z]+);) {
@@ -474,7 +496,13 @@ sub check_for_link {
 
 	download_it($chan, $board, $file, $url, $downurl, $referrer,
 		    $witem, $paramchannel, $paramnick, $signal, $server);
+	last if ++$count > $maxcount;
     }
+
+    if ($count > $maxcount) {
+	write_irssi($witem, "%R>>%n endless loop in 4chan.pl!");
+    }
+
 }
 
 sub cmd_save {
