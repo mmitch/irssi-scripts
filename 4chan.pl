@@ -473,7 +473,7 @@ sub check_for_link {
 	last if ++$count > $maxcount;
     }
 
-    while ($message =~ m;((http://(?:www\.)?ircz\.de)/(?:p/)?[0-9a-z]+);) {
+    while ($message =~ m;((http://(?:www\.)?ircz\.de)/(?:p/)?[0-9a-z]+);g) {
 
 	$url = $1;
 	$referrer = $1;
