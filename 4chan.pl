@@ -1,6 +1,6 @@
 # autodownload 4chan (and similar) links before they disappear
 #
-# Copyright (C) 2006-2010  Christian Garbs <mitch@cgarbs.de>
+# Copyright (C) 2006-2011  Christian Garbs <mitch@cgarbs.de>
 # licensed under GNU GPL v2
 #
 # needs wget and the LWP modules
@@ -17,7 +17,7 @@ use POSIX qw(strftime);
 use LWP::UserAgent;
 use HTTP::Cookies;
 
-$VERSION = '2010-02-28';
+$VERSION = '2011-06-13';
 %IRSSI = (
 	authors  	=> 'Christian Garbs',
 	contact  	=> 'mitch@cgarbs.de',
@@ -122,6 +122,95 @@ sub diskfree($) {
 
     close DF or warn "can't close df: $!";
     return $size;
+}
+
+sub download_it($$$$$$$$$$$) {
+
+    my ($chan, $board, $file, $url, $downurl, $referrer,
+	$witem, $paramchannel, $paramnick, $signal, $server) = (@_);
+
+    write_debug($witem, '$chan='.$chan);
+    write_debug($witem, '$board='.$board);
+    write_debug($witem, '$file='.$file);
+    write_debug($witem, '$url='.$url);
+    write_debug($witem, '$downurl='.$downurl);
+    write_debug($witem, '$referrer='.$referrer);
+
+    my $now = strftime "%d.%m.%Y %H:%M:%S", localtime;
+    $file =~ s/%/%25/g;
+	
+    my $channel = ($paramchannel == -1) ? '-private-' : $signal->[$paramchannel];
+    ## TODO use current nick instead of '*self*'
+    my $nick = ($paramnick == -1) ? '*self*' : $signal->[$paramnick];
+	
+    # handle linking sprees
+    if (Irssi::settings_get_bool('4chan_announce')) {
+	
+	my $context;
+	if ($paramchannel!=-1 && $server->channel_find($signal->[$paramchannel])) {
+	    $context = $server->channel_find($signal->[$paramchannel]);
+	} else {
+	    $context = $server;
+	}
+	
+	if ($last_nick{$channel} eq $nick) {
+	    $spree_count{$channel}++;
+	} else {
+	    if ($spree_count{$channel} > 7) {
+		$context->command('/SAY C-C-C-Combo breaker!');
+	    }
+	    $spree_count{$channel} = 1;
+	    $last_nick{$channel} = $nick;
+	}
+	
+	if (exists $spree_text{$spree_count{$channel}}) {
+	    my $text = $spree_text{$spree_count{$channel}};
+	    $text =~ s/NICK/$nick/g;
+	    if (! ($text =~ s|\*self\*.\s*|/me |)) {
+		$text = "/SAY $text";
+	    }
+	    $context->command($text);
+	}
+    }
+    
+    # do some checks
+    my $downdir = Irssi::settings_get_str('4chan_downdir');
+    unless (-e $downdir) {
+	write_irssi($witem, "%R>>%n 4chan_downdir does not exist!");
+	return;
+    }
+    unless (-d $downdir) {
+	write_irssi($witem, "%R>>%n 4chan_downdir exists but is no directory!");
+	return;
+    }
+    unless (-w $downdir) {
+	write_irssi($witem, "%R>>%n 4chan_downdir is not writeable!");
+	return;
+    }
+    if (diskfree($downdir) < Irssi::settings_get_int('4chan_freespace')) {
+	write_irssi($witem, "%R>>%n 4chan_downdir has not enough free space left!");
+	return;
+    }
+    
+    # download
+    $file =~ y|'"`*$!?|_|;
+    my $filename = "$downdir/$file";
+    my $io = new IO::File "$filename.idx", "a";
+    if (defined $io) {
+	$io->print("NICK\t$nick\n");
+	$io->print("CHANNEL\t$channel\n");
+	$io->print("BOARD\t$board\n");
+	$io->print("FILE\t$file\n");
+	$io->print("URL\t$url\n");
+	$io->print("TIME\t$now\n");
+	$io->print("CHAN\t$chan\n");
+	$io->close;
+	$referrer = "--referer=\"$referrer\"" if ($referrer);
+	my (undef, $tmpfile) = tempfile('4chan.tmp.XXXXXXXXXXXX', DIR => $downdir);
+	$downurl = $url unless ($downurl);
+	system("( wget -U \"$USERAGENT\" $referrer -qO \"$tmpfile\" \"$downurl\" && mv \"$tmpfile\" \"$filename\" && chmod =rw \"$filename\" || rm -f \"$tmpfile\" ) &");
+	write_verbose($witem, "%R>>%n Saving 4chan link");
+    }
 }
 
 sub check_for_link {
@@ -289,92 +378,12 @@ sub check_for_link {
 	}
     }
 
-    write_debug($witem, '$chan='.$chan);
-    write_debug($witem, '$board='.$board);
-    write_debug($witem, '$file='.$file);
-    write_debug($witem, '$url='.$url);
-    write_debug($witem, '$downurl='.$downurl);
-    write_debug($witem, '$referrer='.$referrer);
-
     # download if something was found
     if (defined $chan) {
-	my $now = strftime "%d.%m.%Y %H:%M:%S", localtime;
-	$file =~ s/%/%25/g;
-	
-	my $channel = ($paramchannel == -1) ? '-private-' : $signal->[$paramchannel];
-	## TODO use current nick instead of '*self*'
-	my $nick = ($paramnick == -1) ? '*self*' : $signal->[$paramnick];
-	
-	# handle linking sprees
-	if (Irssi::settings_get_bool('4chan_announce')) {
-
-	    my $context;
-	    if ($paramchannel!=-1 && $server->channel_find($signal->[$paramchannel])) {
-		$context = $server->channel_find($signal->[$paramchannel]);
-	    } else {
-		$context = $server;
-	    }
-
-	    if ($last_nick{$channel} eq $nick) {
-		$spree_count{$channel}++;
-	    } else {
-		if ($spree_count{$channel} > 7) {
-		    $context->command('/SAY C-C-C-Combo breaker!');
-		}
-		$spree_count{$channel} = 1;
-		$last_nick{$channel} = $nick;
-	    }
-
-	    if (exists $spree_text{$spree_count{$channel}}) {
-		my $text = $spree_text{$spree_count{$channel}};
-		$text =~ s/NICK/$nick/g;
-		if (! ($text =~ s|\*self\*.\s*|/me |)) {
-		    $text = "/SAY $text";
-		}
-		$context->command($text);
-	    }
-	}
-
-	# do some checks
-	my $downdir = Irssi::settings_get_str('4chan_downdir');
-	unless (-e $downdir) {
-	    write_irssi($witem, "%R>>%n 4chan_downdir does not exist!");
-	    return;
-	}
-	unless (-d $downdir) {
-	    write_irssi($witem, "%R>>%n 4chan_downdir exists but is no directory!");
-	    return;
-	}
-	unless (-w $downdir) {
-	    write_irssi($witem, "%R>>%n 4chan_downdir is not writeable!");
-	    return;
-	}
-	if (diskfree($downdir) < Irssi::settings_get_int('4chan_freespace')) {
-	    write_irssi($witem, "%R>>%n 4chan_downdir has not enough free space left!");
-	    return;
-	}
-
-	# download
-	$file =~ y|'"`*$!?|_|;
-	my $filename = "$downdir/$file";
-	my $io = new IO::File "$filename.idx", "a";
-	if (defined $io) {
-	    $io->print("NICK\t$nick\n");
-	    $io->print("CHANNEL\t$channel\n");
-	    $io->print("BOARD\t$board\n");
-	    $io->print("FILE\t$file\n");
-	    $io->print("URL\t$url\n");
-	    $io->print("TIME\t$now\n");
-	    $io->print("CHAN\t$chan\n");
-	    $io->close;
-            $referrer = "--referer=\"$referrer\"" if ($referrer);
-	    my (undef, $tmpfile) = tempfile('4chan.tmp.XXXXXXXXXXXX', DIR => $downdir);
-            $downurl = $url unless ($downurl);
-	    system("( wget -U \"$USERAGENT\" $referrer -qO \"$tmpfile\" \"$downurl\" && mv \"$tmpfile\" \"$filename\" && chmod =rw \"$filename\" || rm -f \"$tmpfile\" ) &");
-	    write_verbose($witem, "%R>>%n Saving 4chan link");
-	}
-
+	download_it($chan, $board, $file, $url, $downurl, $referrer,
+	    $witem, $paramchannel, $paramnick, $signal, $server);
     }
+
 }
 
 sub cmd_save {
