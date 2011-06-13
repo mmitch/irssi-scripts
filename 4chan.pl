@@ -232,84 +232,154 @@ sub check_for_link {
     my $referrer = '';
     study $message;
     return if $message =~ m|/nosave|;
-    
-    if ($message =~ m|(http://[a-z]+\.4chan[a-z]*\.org/([a-z0-9]+)/src(?:\.cgi)?/(?:cb-nws/)?(\S+\.[a-z]+))|) {
+
+    while ($message =~ m|(http://[a-z]+\.4chan[a-z]*\.org/([a-z0-9]+)/src(?:\.cgi)?/(?:cb-nws/)?(\S+\.[a-z]+))|g) {
 	$chan = '4chan';
 	$url = $1;
 	$board = $2;
 	$file = $3;
 	$url =~ s|/src.cgi/|/src/|;
 	$url =~ s|/src/cb-news/|/src/|;
-    } elsif ($message =~ m|(http://4chanarchive\.org/images/([a-z0-9]+)/\d+/(\d+\.[a-z]+))|) {
+
+	download_it($chan, $board, $file, $url, $downurl, $referrer,
+		    $witem, $paramchannel, $paramnick, $signal, $server);
+    }
+
+    while ($message =~ m|(http://4chanarchive\.org/images/([a-z0-9]+)/\d+/(\d+\.[a-z]+))|g) {
 	$chan = '4chanarchive';
 	$url = $1;
 	$board = $2;
 	$file = $3;
-    } elsif ($message =~ m|(http://4chanarchive\.org/images/\d+/(\d+\.[a-z]+))|) { # still needed?
+
+	download_it($chan, $board, $file, $url, $downurl, $referrer,
+		    $witem, $paramchannel, $paramnick, $signal, $server);
+    }
+
+    while ($message =~ m|(http://4chanarchive\.org/images/\d+/(\d+\.[a-z]+))|g) { # still needed?
 	$chan = '4chanarchive';
 	$url = $1;
 	$board = '?';
 	$file = $2;
-    } elsif ($message =~ m|(http://img\.fapchan\.org/([a-z0-9]+)/src/(\S+\.[a-z]+))|) {
+
+	download_it($chan, $board, $file, $url, $downurl, $referrer,
+		    $witem, $paramchannel, $paramnick, $signal, $server);
+    }
+
+    while ($message =~ m|(http://img\.fapchan\.org/([a-z0-9]+)/src/(\S+\.[a-z]+))|g) {
 	$chan = 'fapchan';
 	$url = $1;
 	$board = $2;
 	$file = $3;
-    } elsif ($message =~ m|(http://(www.)?krautchan.net/files/(\S+\.[a-z]+))|) {
+
+	download_it($chan, $board, $file, $url, $downurl, $referrer,
+		    $witem, $paramchannel, $paramnick, $signal, $server);
+    } 
+
+    while ($message =~ m|(http://(www.)?krautchan.net/files/(\S+\.[a-z]+))|g) {
 	$chan = 'Krautchan';
 	$url = $1;
 	$board = '?';
 	$file = $3;
-    } elsif ($message =~ m|(http://(www.)?krautchan.net/download.pl/(\S+\.[a-z]+)/)|) {
+
+	download_it($chan, $board, $file, $url, $downurl, $referrer,
+		    $witem, $paramchannel, $paramnick, $signal, $server);
+    }
+
+    while  ($message =~ m|(http://(www.)?krautchan.net/download.pl/(\S+\.[a-z]+)/)|g) {
 	$chan = 'Krautchan';
 	$url = $1;
 	$board = '?';
 	$file = $3;
-    } elsif ($message =~ m|(http://i.somethingawful.com/(.*/)?([^/]+)/(\S+\.[a-z]+))|) {
+
+	download_it($chan, $board, $file, $url, $downurl, $referrer,
+		    $witem, $paramchannel, $paramnick, $signal, $server);
+    } 
+
+    while ($message =~ m|(http://i.somethingawful.com/(.*/)?([^/]+)/(\S+\.[a-z]+))|g) {
 	$chan = 'sth awful';
 	$url = $1;
 	$board = $3;
 	$file = $4;
-    } elsif ($message =~ m|(http://z0r.de/\?id=(\d+))|) {
+
+	download_it($chan, $board, $file, $url, $downurl, $referrer,
+		    $witem, $paramchannel, $paramnick, $signal, $server);
+    }
+
+    while ($message =~ m|(http://z0r.de/\?id=(\d+))|g) {
 	$chan = 'z0r';
 	$url = $1;
 	$downurl = "http://z0r.de/L/$2.swf";
 	$referrer = $1;
 	$board = '-';
 	$file = "$2.swf";
-    } elsif ($message =~ m|(http://[a-z]+\.2chan\.net/([a-z0-9]+)/src/(\S+\.[a-z]+))|) {
+
+	download_it($chan, $board, $file, $url, $downurl, $referrer,
+		    $witem, $paramchannel, $paramnick, $signal, $server);
+    }
+
+    while ($message =~ m|(http://[a-z]+\.2chan\.net/([a-z0-9]+)/src/(\S+\.[a-z]+))|g) {
 	$chan = '2chan';
 	$url = $1;
 	$board = $2;
 	$file = $3;
-    } elsif ($message =~ m|(http://[a-z]+\.7chan\.org/([a-z0-9]+)/src/(\S+\.[a-z]+))|) {
+
+	download_it($chan, $board, $file, $url, $downurl, $referrer,
+		    $witem, $paramchannel, $paramnick, $signal, $server);
+    }
+
+    while ($message =~ m|(http://[a-z]+\.7chan\.org/([a-z0-9]+)/src/(\S+\.[a-z]+))|g) {
 	$chan = '7chan';
 	$url = $1;
 	$board = $2;
 	$file = $3;
-    } elsif ($message =~ m|(http://[a-z]+\.gurochan\.net/([a-z0-9]+)/src/(\S+\.[a-z]+))|) {
+
+	download_it($chan, $board, $file, $url, $downurl, $referrer,
+		    $witem, $paramchannel, $paramnick, $signal, $server);
+    }
+
+    while ($message =~ m|(http://[a-z]+\.gurochan\.net/([a-z0-9]+)/src/(\S+\.[a-z]+))|g) {
 	$chan = 'gurochan';
 	$url = $1;
 	$board = $2;
 	$file = $3;
-    } elsif ($message =~ m|(http://.*mexx\.onlinewelten\.com)/.*fotos/(\d+)/(\d+)/(\d+)(\.gross)?\.jpg|) {
+
+	download_it($chan, $board, $file, $url, $downurl, $referrer,
+		    $witem, $paramchannel, $paramnick, $signal, $server);
+    }
+
+    while ($message =~ m|(http://.*mexx\.onlinewelten\.com)/.*fotos/(\d+)/(\d+)/(\d+)(\.gross)?\.jpg|g) {
 	$chan = 'animexx';
 	$url = "$1/fotos/$2/$3/$4.gross.jpg";
 	$board = '-';
 	$file = "$2_$3_$4.jpg";
-    } elsif ($message =~ m|(http://lh\d\.\S+\.\S+/abramsv/\S{11}/\S{11}/\S{11}/s.+)(/(\S+.jpg))|) {
+
+	download_it($chan, $board, $file, $url, $downurl, $referrer,
+		    $witem, $paramchannel, $paramnick, $signal, $server);
+    }
+
+    while ($message =~ m|(http://lh\d\.\S+\.\S+/abramsv/\S{11}/\S{11}/\S{11}/s.+)(/(\S+.jpg))|g) {
 	$chan = 'Dark Roasted Blend';
 	$url = "$1$2";
 	$board = '-';
 	$file = $3;
-    } elsif ($message =~ m|(http://rule63.nerdramblingz.com/index.php\?q=/post/view/(\d+))|) {
+
+	download_it($chan, $board, $file, $url, $downurl, $referrer,
+		    $witem, $paramchannel, $paramnick, $signal, $server);
+    }
+
+    while ($message =~ m|(http://rule63.nerdramblingz.com/index.php\?q=/post/view/(\d+))|g) {
 	$chan = 'rule#63';
 	$url = $1;
 	$referrer = $url;
 	$board = '-';
 	$downurl = "http://rule63.nerdramblingz.com/index.php?q=/image/$2.jpg";
 	$file = "r63_$2.jpg";
-    } elsif ($message =~ m|(http://rule34.paheal.net/post/view/\d+)|) {
+
+	download_it($chan, $board, $file, $url, $downurl, $referrer,
+		    $witem, $paramchannel, $paramnick, $signal, $server);
+    }
+
+    while ($message =~ m|(http://rule34.paheal.net/post/view/\d+)|g) {
 	$chan = 'rule#34';
 	$url = $1;
 	$referrer = $url;
@@ -318,7 +388,12 @@ sub check_for_link {
 	chomp $downurl;
 	$file = $downurl;
 	$file =~ s|^.*/(\d+).*(\.[a-z]+)$|r34_$1$2|;
-    } elsif ($message =~ m|(http://(?:www\.)?wurstball.de/(\d+)/)|) {
+
+	download_it($chan, $board, $file, $url, $downurl, $referrer,
+		    $witem, $paramchannel, $paramnick, $signal, $server);
+    }
+
+    while ($message =~ m|(http://(?:www\.)?wurstball.de/(\d+)/)|g) {
 	$chan = 'wurstball';
 	$url = $1;
 	$referrer = $url;
@@ -329,7 +404,12 @@ sub check_for_link {
 	$file = $downurl;
 	$file =~ s|^.*\.|.|;
 	$file = $number . $file;
-    } elsif ($message =~ m;(http://pics.nase-bohren.de/(.*\.(?:jpg|gif|png)));) {
+
+	download_it($chan, $board, $file, $url, $downurl, $referrer,
+		    $witem, $paramchannel, $paramnick, $signal, $server);
+    }
+
+    while ($message =~ m;(http://pics.nase-bohren.de/(.*\.(?:jpg|gif|png)));g) {
 	$chan = 'nase-bohren';
 	$url = $1;
 	$referrer = 'http://pics.nase-bohren.de/';
@@ -337,14 +417,24 @@ sub check_for_link {
 	$file = $2;
 	$downurl = $referrer . `GET "$url" | grep 'alt="$file' | sed -e 's/^.*src="//' -e 's/".*//'`;
 	chomp $downurl;
-    } elsif ($message =~ m;(http://(?:www\.)?fukung\.net/v/(\d+)/(.+\.(?:jpg|gif|png)));) {
+
+	download_it($chan, $board, $file, $url, $downurl, $referrer,
+		    $witem, $paramchannel, $paramnick, $signal, $server);
+    }
+
+    while ($message =~ m;(http://(?:www\.)?fukung\.net/v/(\d+)/(.+\.(?:jpg|gif|png)));g) {
 	$chan = 'fukung.net';
 	$url = $1;
 	$referrer = $1;
 	$board = '-';
 	$file = $3;
 	$downurl = "http://media.fukung.net/images/$2/$3";
-    } elsif ($message =~ m;(http://naurunappula.com/\d+/(.+?\.(?:jpg|gif|png)));) {
+
+	download_it($chan, $board, $file, $url, $downurl, $referrer,
+		    $witem, $paramchannel, $paramnick, $signal, $server);
+    }
+
+    while ($message =~ m;(http://naurunappula.com/\d+/(.+?\.(?:jpg|gif|png)));g) {
 	$chan = 'naurunappula';
 	$url = $1;
 	$referrer = $1;
@@ -356,7 +446,12 @@ sub check_for_link {
 	$downurl =~ tr/\012//d;
 	$downurl =~ s/^.*?src="//;
 	$downurl =~ s/".*?$//;
-    } elsif ($message =~ m;((http://(?:www\.)?ircz\.de)/(?:p/)?[0-9a-z]+);) {
+
+	download_it($chan, $board, $file, $url, $downurl, $referrer,
+		    $witem, $paramchannel, $paramnick, $signal, $server);
+    }
+
+    while ($message =~ m;((http://(?:www\.)?ircz\.de)/(?:p/)?[0-9a-z]+);) {
 
 	$url = $1;
 	$referrer = $1;
@@ -376,14 +471,10 @@ sub check_for_link {
 	    $downurl .= $file;
 	    $file =~ s,^.*/,,;
 	}
-    }
 
-    # download if something was found
-    if (defined $chan) {
 	download_it($chan, $board, $file, $url, $downurl, $referrer,
-	    $witem, $paramchannel, $paramnick, $signal, $server);
+		    $witem, $paramchannel, $paramnick, $signal, $server);
     }
-
 }
 
 sub cmd_save {
