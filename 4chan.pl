@@ -461,7 +461,7 @@ sub check_for_link {
 	$referrer = $1;
 	$board = '-';
 	$file = $2;
-	$downurl = `GET "$url" | grep -B 1 "document.write('.*/nn/" `;
+	$downurl = `GET "$url" | grep -A 11 'div id="viewembedded"' | grep "document.write('.*" `;
 	$downurl =~ s/document.write\('//g;
 	$downurl =~ s/'\);//g;
 	$downurl =~ tr/\012//d;
