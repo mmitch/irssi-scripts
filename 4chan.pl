@@ -17,7 +17,7 @@ use POSIX qw(strftime);
 use LWP::UserAgent;
 use HTTP::Cookies;
 
-$VERSION = '2011-06-13';
+$VERSION = '2012-02-14';
 %IRSSI = (
 	authors  	=> 'Christian Garbs',
 	contact  	=> 'mitch@cgarbs.de',
@@ -315,13 +315,17 @@ sub check_for_link {
 	last if ++$count > $maxcount;
     }
 
-    while ($message =~ m|(http://z0r.de/\?id=(\d+))|g) {
-	$chan = 'z0r';
+    while ($message =~ m;(http://z0r.de/(\d+));g) {
+	$chan = 'z0r.de';
 	$url = $1;
-	$downurl = "http://z0r.de/L/$2.swf";
 	$referrer = $1;
 	$board = '-';
-	$file = "$2.swf";
+	$file = "z0r-de_$2.swf";
+	if ($2 < 2000) {
+	    $downurl = "http://raz.z0r.de/L/$file";
+	} else {
+	    $downurl = "http://z0r.de/L/$file";
+	}
 
 	download_it($chan, $board, $file, $url, $downurl, $referrer,
 		    $witem, $paramchannel, $paramnick, $signal, $server);
