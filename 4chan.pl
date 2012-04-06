@@ -236,7 +236,7 @@ sub check_for_link {
     my ($maxcount, $count) = (32, 0);
     
 
-    while ($message =~ m|(http://[a-z]+\.4chan[a-z]*\.org/([a-z0-9]+)/src(?:\.cgi)?/(?:cb-nws/)?(\S+\.[a-z]+))|g) {
+    while ($message =~ m|(https?://[a-z]+\.4chan[a-z]*\.org/([a-z0-9]+)/src(?:\.cgi)?/(?:cb-nws/)?(\S+\.[a-z]+))|g) {
 	$chan = '4chan';
 	$url = $1;
 	$board = $2;
