@@ -17,14 +17,14 @@ use POSIX qw(strftime);
 use LWP::UserAgent;
 use HTTP::Cookies;
 
-$VERSION = '2012-04-06';
+$VERSION = '2012-05-02';
 %IRSSI = (
 	authors  	=> 'Christian Garbs',
 	contact  	=> 'mitch@cgarbs.de',
 	name    	=> '4chan',
 	description 	=> 'autodownload 4chan (and similar) links before they disappear',
 	license 	=> 'GPLv2',
-	url     	=> 'http://www.cgarbs.de/',
+	url     	=> 'http://github.com/mmitch/irssi-scripts/',
 	changed  	=> $VERSION,
 );
 my $USERAGENT='Mozilla/4.0 (compatible; MSIE 5.0; Linux) Opera 5.0  [en]';
