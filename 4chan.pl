@@ -194,7 +194,7 @@ sub download_it($$$$$$$$$$$) {
     # download
     $file =~ y|'"`*$!?|_|;
     my $filename = "$downdir/$file";
-    my $io = new IO::File '$filename.idx', 'a';
+    my $io = new IO::File "$filename.idx", 'a';
     if (defined $io) {
 	$io->print("NICK\t$nick\n");
 	$io->print("CHANNEL\t$channel\n");
