@@ -43,10 +43,10 @@ configuration variables:
 /set 4chan_announce   announce linking sprees
 /set 4chan_conffile   configuration file
 /set 4chan_downdir    the download directory
-/set 4chan_verbose    show link aquisition
 /set 4chan_freespace  minimum space to be free
                       in downdir in 1024-blocks
                       (should prevent DoS)
+/set 4chan_verbose    show link aquisition
 SCRIPTHELP_EOF
    ,MSGLEVEL_CLIENTCRAP);
 }
