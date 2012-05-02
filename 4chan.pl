@@ -194,7 +194,7 @@ sub download_it($$$$$$$$$$$) {
     # download
     $file =~ y|'"`*$!?|_|;
     my $filename = "$downdir/$file";
-    my $io = new IO::File "$filename.idx", "a";
+    my $io = new IO::File '$filename.idx', 'a';
     if (defined $io) {
 	$io->print("NICK\t$nick\n");
 	$io->print("CHANNEL\t$channel\n");
@@ -511,7 +511,7 @@ sub check_for_link {
 sub cmd_save {
     
     my $filename = Irssi::settings_get_str('4chan_conffile');
-    my $io = new IO::File $filename, "w";
+    my $io = new IO::File $filename, 'w';
     if (defined $io) {
 	$io->print("ANNOUNCE\t"  . Irssi::settings_get_bool('4chan_announce')  . "\n");
 	$io->print("DOWNDIR\t"   . Irssi::settings_get_str( '4chan_downdir')   . "\n");
@@ -536,7 +536,7 @@ sub sig_command_script_unload {
 sub cmd_load {
     
     my $filename = Irssi::settings_get_str('4chan_conffile');
-    my $io = new IO::File $filename, "r";
+    my $io = new IO::File $filename, 'r';
     if (defined $io) {
 	foreach my $line ($io->getlines) {
 	    chomp $line;
