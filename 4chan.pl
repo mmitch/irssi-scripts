@@ -32,7 +32,6 @@ my $USERAGENT='Mozilla/4.0 (compatible; MSIE 5.0; Linux) Opera 5.0  [en]';
 # activate debug here
 my $debug = 0;
 
-## TODO help does not work
 sub cmd_help {
 	Irssi::print ( <<"SCRIPTHELP_EOF"
 
