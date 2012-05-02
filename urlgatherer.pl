@@ -100,6 +100,7 @@ sub update_html_file($$) {
     while ($urlgatherer_links[0]->{TIME} < $expiredate) {
 	write_debug($witem, "removing <$urlgatherer_links[0]->{TIMESTR}> -> <$urlgatherer_links[0]->{URL}>");
 	shift @urlgatherer_links;
+	last unless @urlgatherer_links; # yuck! combined test before/test after
     }
     write_debug($witem, scalar(@urlgatherer_links) . ' entries left in database');
 
