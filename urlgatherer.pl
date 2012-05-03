@@ -148,7 +148,7 @@ sub check_for_link {
     my $now = time;
     my $now_str = strftime "%d.%m.%Y %H:%M:%S", localtime;
 
-    while ($message =~ m,(?:((?:http|https|ftp|file)://.*)\s?|(www\..*)\s?),gi) {
+    while ($message =~ m,(?:((?:http|https|ftp|file)://[^ ]*)|(www\.[^ ]*)),gi) {
 	my $url = $1;
 	if ($url =~ /^www\./i) {
 	    $url = 'http://'.$url;
