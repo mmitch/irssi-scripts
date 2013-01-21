@@ -476,6 +476,19 @@ sub check_for_link {
 	last if ++$count > $maxcount;
     }
 
+    while ($message =~ m;(https?://i.imgur.com/([0-9a-zA-Z.]+));g) {
+
+	$chan = 'imgur.com';
+	$url = $1;
+	$file = $2;
+	$referrer = '';
+	$board = '-';
+	
+	download_it($chan, $board, $file, $url, $downurl, $referrer,
+		    $witem, $paramchannel, $paramnick, $signal, $server);
+	last if ++$count > $maxcount;
+    }
+
     while ($message =~ m;((http://(?:www\.)?ircz\.de)/(?:p/)?[0-9a-z]+);g) {
 
 	$url = $1;
