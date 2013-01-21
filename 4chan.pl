@@ -243,7 +243,7 @@ sub check_for_link {
 	$url =~ s|/src.cgi/|/src/|;
 	$url =~ s|/src/cb-news/|/src/|;
 
-	download_it($chan, $board, $file, $url, $downurl, $referrer,
+	download_it($chan, $board, $file, $url, '', '',
 		    $witem, $paramchannel, $paramnick, $signal, $server);
 	last if ++$count > $maxcount;
     }
@@ -254,7 +254,7 @@ sub check_for_link {
 	$board = $2;
 	$file = $3;
 
-	download_it($chan, $board, $file, $url, $downurl, $referrer,
+	download_it($chan, $board, $file, $url, '', '',
 		    $witem, $paramchannel, $paramnick, $signal, $server);
 	last if ++$count > $maxcount;
     }
@@ -265,7 +265,7 @@ sub check_for_link {
 	$board = '?';
 	$file = $2;
 
-	download_it($chan, $board, $file, $url, $downurl, $referrer,
+	download_it($chan, $board, $file, $url, '', '',
 		    $witem, $paramchannel, $paramnick, $signal, $server);
 	last if ++$count > $maxcount;
     }
@@ -276,7 +276,7 @@ sub check_for_link {
 	$board = $2;
 	$file = $3;
 
-	download_it($chan, $board, $file, $url, $downurl, $referrer,
+	download_it($chan, $board, $file, $url, '', '',
 		    $witem, $paramchannel, $paramnick, $signal, $server);
 	last if ++$count > $maxcount;
     } 
@@ -287,7 +287,7 @@ sub check_for_link {
 	$board = '?';
 	$file = $3;
 
-	download_it($chan, $board, $file, $url, $downurl, $referrer,
+	download_it($chan, $board, $file, $url, '', '',
 		    $witem, $paramchannel, $paramnick, $signal, $server);
 	last if ++$count > $maxcount;
     }
@@ -298,7 +298,7 @@ sub check_for_link {
 	$board = '?';
 	$file = $3;
 
-	download_it($chan, $board, $file, $url, $downurl, $referrer,
+	download_it($chan, $board, $file, $url, '', '',
 		    $witem, $paramchannel, $paramnick, $signal, $server);
 	last if ++$count > $maxcount;
     } 
@@ -309,7 +309,7 @@ sub check_for_link {
 	$board = $3;
 	$file = $4;
 
-	download_it($chan, $board, $file, $url, $downurl, $referrer,
+	download_it($chan, $board, $file, $url, '', '',
 		    $witem, $paramchannel, $paramnick, $signal, $server);
 	last if ++$count > $maxcount;
     }
@@ -337,7 +337,7 @@ sub check_for_link {
 	$board = $2;
 	$file = $3;
 
-	download_it($chan, $board, $file, $url, $downurl, $referrer,
+	download_it($chan, $board, $file, $url, '', '',
 		    $witem, $paramchannel, $paramnick, $signal, $server);
 	last if ++$count > $maxcount;
     }
@@ -348,7 +348,7 @@ sub check_for_link {
 	$board = $2;
 	$file = $3;
 
-	download_it($chan, $board, $file, $url, $downurl, $referrer,
+	download_it($chan, $board, $file, $url, '', '',
 		    $witem, $paramchannel, $paramnick, $signal, $server);
 	last if ++$count > $maxcount;
     }
@@ -359,7 +359,7 @@ sub check_for_link {
 	$board = $2;
 	$file = $3;
 
-	download_it($chan, $board, $file, $url, $downurl, $referrer,
+	download_it($chan, $board, $file, $url, '', '',
 		    $witem, $paramchannel, $paramnick, $signal, $server);
 	last if ++$count > $maxcount;
     }
@@ -370,7 +370,7 @@ sub check_for_link {
 	$board = '-';
 	$file = "$2_$3_$4.jpg";
 
-	download_it($chan, $board, $file, $url, $downurl, $referrer,
+	download_it($chan, $board, $file, $url, '', '',
 		    $witem, $paramchannel, $paramnick, $signal, $server);
 	last if ++$count > $maxcount;
     }
@@ -381,7 +381,7 @@ sub check_for_link {
 	$board = '-';
 	$file = $3;
 
-	download_it($chan, $board, $file, $url, $downurl, $referrer,
+	download_it($chan, $board, $file, $url, '', '',
 		    $witem, $paramchannel, $paramnick, $signal, $server);
 	last if ++$count > $maxcount;
     }
@@ -481,10 +481,9 @@ sub check_for_link {
 	$chan = 'imgur.com';
 	$url = $1;
 	$file = $2;
-	$referrer = '';
 	$board = '-';
 	
-	download_it($chan, $board, $file, $url, $downurl, $referrer,
+	download_it($chan, $board, $file, $url, '', '',
 		    $witem, $paramchannel, $paramnick, $signal, $server);
 	last if ++$count > $maxcount;
     }
