@@ -1,6 +1,6 @@
 # autodownload 4chan (and similar) links before they disappear
 #
-# Copyright (C) 2006-2012  Christian Garbs <mitch@cgarbs.de>
+# Copyright (C) 2006-2013  Christian Garbs <mitch@cgarbs.de>
 # licensed under GNU GPL v2
 #
 # needs wget and the LWP modules
@@ -17,7 +17,7 @@ use POSIX qw(strftime);
 use LWP::UserAgent;
 use HTTP::Cookies;
 
-$VERSION = '2012-05-02';
+$VERSION = '2013-01-21';
 %IRSSI = (
 	authors  	=> 'Christian Garbs',
 	contact  	=> 'mitch@cgarbs.de',
