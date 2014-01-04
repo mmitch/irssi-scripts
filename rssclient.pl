@@ -24,7 +24,7 @@ $VERSION = '0.1';
 my %settings =
     (
      window   => 'rssfeeds',
-     interval => 60,
+     interval => 60*15,
      rss_url  => 'http://www.slashdot.org/slashdot.rss'
     );
 
