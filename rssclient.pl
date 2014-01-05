@@ -23,14 +23,43 @@ $VERSION = '0.1';
 
 my %settings =
     (
-     window   => 'rssfeeds',
-     interval => 60*15,
-     rss_url  => 'http://www.slashdot.org/slashdot.rss'
+     window   => 'rssfeeds', # the irssi window name
+     interval => 12,         # check individual feed intervals every n minutes
+    );
+
+my @feedlist =
+    (
+     # for testing (there is some volume here)
+     { # for testing
+	 name     => '/.',
+	 url      => 'http://www.slashdot.org/slashdot.rss',
+	 interval => 31
+     },
+     # only locally retrievable, you won't get this
+     {
+	 name     => 'psy',
+	 url      => 'http://www.mitch.h.shuttle.de/kosmosblog.xml',
+	 interval => 44
+     },
+     # my stuff
+     {
+	 name     => 'cgarbs.de',
+	 url      => 'http://www.cgarbs.de/rssfeed.en.xml',
+	 interval => 61
+     },
+     {
+	 name     => 'mitchblog.comments',
+	 url      => 'http://www.cgarbs.de/blog/feeds/comments.rss2',
+	 interval => 33
+     },
+     {
+	 name     => 'mitchblog',
+	 url      => 'http://www.cgarbs.de/blog/feeds/index.rss2',
+	 interval => 29
+     },
     );
 
 my $poll_event = 0;
-
-my @items_seen = ();
 
 # Fetches the RSS from server and returns a list of RSS items.
 sub fetch_rss
@@ -71,59 +100,76 @@ sub delta_rss
     return @$new[0 .. $item - 1];
 }
 
-sub getWin
+sub get_win
 {
     return Irssi::window_find_name( $settings{window} );
 }
 
-sub printError
+sub print_error
 {
     Irssi::active_win()->print($_) foreach @_;
 }
 
-sub printText
+sub print_text
 {
-    my $win = getWin();
+    my $win = get_win();
     if ($win)
     {
 	$win->print($_) foreach @_;
     }
     else
     {
-	printError(@_);
+	print_error(@_);
+    }
+}
+
+sub poll_feed
+{
+    my $feed = shift;
+
+    # individual poll time reached?
+    my $lastpoll = exists $feed->{lastpoll} ? $feed->{lastpoll} : 0;
+    my $now = time();
+    if ($now - $lastpoll > $feed->{interval} * 60)
+    {
+	print "Checking RSS feed [".$feed->{url}."]...";
+	my @new_items = fetch_rss( $feed->{url} );
+	if (@new_items)
+	{
+	    my @old_items = exists $feed->{items} ? @{$feed->{items}} : ();
+	    my @delta = delta_rss (\@old_items, \@new_items);
+	    foreach my $item (reverse @delta)
+	    {
+		print_text('"'.$item->{title}.'" :: '.$item->{link});
+	    }
+	    $feed->{items} = @new_items;
+	    $feed->{lastpoll} = $now;
+	}
     }
 }
 
 sub callback
 {
-    my (@new_items);
-    print "Checking RSS feed [".$settings{rss_url}."]...\n";
-    @new_items = fetch_rss( $settings{rss_url} );
-    if (@new_items)
+    foreach my $feed (@feedlist)
     {
-	my @delta = delta_rss (\@items_seen, \@new_items);
-	foreach my $item (reverse @delta)
-	{
-	    printText('"'.$item->{title}.'" :: '.$item->{link});
-	}
-	@items_seen = @new_items;
+	poll_feed($feed);
     }
 }
 
 sub register_poll_event
 {
     Irssi::timeout_remove($poll_event) if $poll_event;
-    Irssi::timeout_add($settings{interval}*1000, \&callback, [1] );
+    Irssi::timeout_add($settings{interval}*1000*60, \&callback, [1] );
 }
 
-if ( getWin() )
+if ( get_win() )
 {
     register_poll_event();
-    printText( "$IRSSI{name} initialized: poll interval = $settings{interval}s" );
+    print_text( "$IRSSI{name} initialized: poll interval = $settings{interval}m" );
     callback();
 }
 else
 {
-    printError( "Create a window named `$settings{window}'.  Then, reload $IRSSI{name}." );
-    printError( "Hint: /window new hide ; /window name $settings{window} ; /script load $IRSSI{name}" );
+    print_error( "Create a window named `$settings{window}'.  Then, reload $IRSSI{name}." );
+    print_error( "Hint: /window new hide ; /window name $settings{window} ; /script load $IRSSI{name}" );
 }
