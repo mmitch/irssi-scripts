@@ -17,8 +17,8 @@ $VERSION = '0.1';
     name        => 'rssclient',
     description => 'Follow RSS feeds in a separate window.',
     license => 'GNU GPL v3 or later',
-    url     => '*unreleased*',
-    changed => '*unreleased*',
+    url     => 'https://github.com/mmitch/irssi-scripts',
+    changed => '2014-01-05',
 );
 
 my %settings =
@@ -29,11 +29,16 @@ my %settings =
 
 my @feedlist =
     (
-     # for testing (there is some volume here)
-     { # for testing
+     # for testing (high-volume feeds)
+     {
 	 name     => '/.',
 	 url      => 'http://www.slashdot.org/slashdot.rss',
 	 interval => 31
+     },
+     {
+	 name     => 'heise',
+	 url      => 'http://www.heise.de/newsticker/heise.rdf',
+	 interval => 23
      },
      # only locally retrievable, you won't get this
      {
@@ -43,23 +48,32 @@ my @feedlist =
      },
      # my stuff
      {
-	 name     => 'cgarbs.de',
+	 name     => 'cgarbs',
 	 url      => 'http://www.cgarbs.de/rssfeed.en.xml',
 	 interval => 61
      },
      {
-	 name     => 'mitchblog.comments',
+	 name     => 'mitch.c',
 	 url      => 'http://www.cgarbs.de/blog/feeds/comments.rss2',
 	 interval => 33
      },
      {
-	 name     => 'mitchblog',
+	 name     => 'mitch',
 	 url      => 'http://www.cgarbs.de/blog/feeds/index.rss2',
 	 interval => 29
      },
     );
 
 my $poll_event = 0;
+
+my @colors = qw
+    (
+     %w%4 %w%1 %w%5 %k%2 %k%3 %k%6 %k%7 %k%1 %k%5 
+     %g%4 %g%1 %r%4 %r%2 %r%3 %r%6 %r%7
+     %m%4 %m%3 %m%6 %m%7 %y%4 %y%1 %y%5 %R%4 %R%3 
+     %G%4 %G%1 %G%5 %c%4 %c%1 %c%5 %C%4 %C%1 %C%5
+     %B%4 %M%4 %M%7 %b%2 %b%3 %b%6 %b%7 
+    );
 
 # Fetches the RSS from server and returns a list of RSS items.
 sub fetch_rss
@@ -105,22 +119,32 @@ sub get_win
     return Irssi::window_find_name( $settings{window} );
 }
 
+sub print_intern
+{
+    my $win   = shift;
+    my $level = shift;
+
+    if (! $win)
+    {
+	$win = Irssi::active_win();
+    }
+
+    $win->print($_, $level) foreach @_;
+}
+
 sub print_error
 {
-    Irssi::active_win()->print($_) foreach @_;
+    print_intern(Irssi::active_win(), MSGLEVEL_CLIENTERROR, @_);
 }
 
 sub print_text
 {
-    my $win = get_win();
-    if ($win)
-    {
-	$win->print($_) foreach @_;
-    }
-    else
-    {
-	print_error(@_);
-    }
+    print_intern(get_win(), MSGLEVEL_PUBLIC, @_);
+}
+
+sub print_debug
+{
+    print_intern(Irssi::window_find_name('(status)'), MSGLEVEL_CLIENTCRAP, @_);
 }
 
 sub poll_feed
@@ -128,21 +152,25 @@ sub poll_feed
     my $feed = shift;
 
     # individual poll time reached?
-    my $lastpoll = exists $feed->{lastpoll} ? $feed->{lastpoll} : 0;
+    my $lastpoll = $feed->{lastpoll};
     my $now = time();
     if ($now - $lastpoll > $feed->{interval} * 60)
     {
-	print "Checking RSS feed [".$feed->{url}."]...";
+	print_debug "Checking RSS feed $feed->{name} [$feed->{url}]...";
 	my @new_items = fetch_rss( $feed->{url} );
 	if (@new_items)
 	{
-	    my @old_items = exists $feed->{items} ? @{$feed->{items}} : ();
+	    my @old_items = @{$feed->{items}};
 	    my @delta = delta_rss (\@old_items, \@new_items);
 	    foreach my $item (reverse @delta)
 	    {
-		print_text('"'.$item->{title}.'" :: '.$item->{link});
+		print_text(
+		    $feed->{color} . $feed->{name} . '%n ' .
+		    '%_' . $item->{title}. '%_ ' .
+		    $item->{link}
+		    );
 	    }
-	    $feed->{items} = @new_items;
+	    $feed->{items} = \@new_items;
 	    $feed->{lastpoll} = $now;
 	}
     }
@@ -162,10 +190,39 @@ sub register_poll_event
     Irssi::timeout_add($settings{interval}*1000*60, \&callback, [1] );
 }
 
+sub rainbow_bar
+{
+    my $colortext = '';
+    foreach my $color (@colors)
+    {
+	my $escaped = $color;
+	$escaped =~ s/%/%%/g;
+	$colortext .= "$color$escaped%n ";
+    }
+    print_text( $colortext );
+}
+
+
+### main ignition sequence start
+
+# initialize feeds
+my $i = 0;
+foreach my $feed (@feedlist)
+{
+    $feed->{lastpoll} = 0;
+    $feed->{items} = [];
+    $feed->{color} = $colors[ $i++ % @colors ];
+}
+
+# startup
 if ( get_win() )
 {
     register_poll_event();
     print_text( "$IRSSI{name} initialized: poll interval = $settings{interval}m" );
+
+    # just for color debugging
+    # rainbow_bar();
+
     callback();
 }
 else
