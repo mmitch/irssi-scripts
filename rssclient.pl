@@ -46,6 +46,11 @@ my @feedlist =
 	 url      => 'http://www.mitch.h.shuttle.de/kosmosblog.xml',
 	 interval => 44
      },
+     {
+	 name     => 'wiki',
+	 url      => 'http://www.mitch.h.shuttle.de/mediawiki/index.php?title=Spezial:Letzte_%C3%84nderungen&feed=atom',
+	 interval => 44
+     },
      # my stuff
      {
 	 name     => 'cgarbs',
@@ -61,6 +66,62 @@ my @feedlist =
 	 name     => 'mitch',
 	 url      => 'http://www.cgarbs.de/blog/feeds/index.rss2',
 	 interval => 29
+     },
+     # real feeds
+     {
+	 name     => 'polloi',
+	 url      => 'http://feed43.com/ahoipolloi.xml',
+	 interval => 50 + int(rand(20)),
+     },
+     {
+	 name     => 'virt',
+	 url      => 'http://www.biglionmusic.com/feed/',
+	 interval => 50 + int(rand(20)),
+     },
+     {
+	 name     => 'fefe',
+	 url      => 'http://blog.fefe.de/rss.xml?html',
+	 interval => 50 + int(rand(20)),
+     },
+     {
+	 name     => 'leckse',
+	 url      => 'https://ssl.animexx.de/weblog/415/rss/',
+	 interval => 50 + int(rand(20)),
+     },
+     {
+	 name     => 'nonbiri',
+	 url      => 'http://ani.donmai.ch/?feed=rss2',
+	 interval => 50 + int(rand(20)),
+     },
+     {
+	 name     => 'ipfreaks',
+	 url      => 'http://ipfreaks.de/feed/',
+	 interval => 50 + int(rand(20)),
+     },
+     {
+	 name     => 'piratesoflove',
+	 url      => 'http://www.pirates-of-love.de/?feed=rss2',
+	 interval => 50 + int(rand(20)),
+     },
+     {
+	 name     => 'mrehkopf',
+	 url      => 'http://mrehkopf.de/blog/?feed=rss2',
+	 interval => 50 + int(rand(20)),
+     },
+     {
+	 name     => 'lalufu',
+	 url      => 'http://www.skytale.net/blog/feeds/index.rss2',
+	 interval => 50 + int(rand(20)),
+     },
+     {
+	 name     => 'niessu',
+	 url      => 'http://www.plouf.de/foto/index.php?/feeds/index.rss2',
+	 interval => 50 + int(rand(20)),
+     },
+     {
+	 name     => 'ant',
+	 url      => 'http://blog.tomodachi.de/feeds/index.rss2',
+	 interval => 50 + int(rand(20)),
      },
     );
 
@@ -144,7 +205,7 @@ sub print_text
 
 sub print_debug
 {
-    print_intern(Irssi::window_find_name('(status)'), MSGLEVEL_CLIENTCRAP, @_);
+#    print_intern(Irssi::window_find_name('(status)'), MSGLEVEL_CLIENTCRAP, @_);
 }
 
 sub poll_feed
