@@ -30,47 +30,57 @@ my %settings =
 my @feedlist =
     (
      # for testing (high-volume feeds)
-     {
-	 name     => '/.',
-	 url      => 'http://www.slashdot.org/slashdot.rss',
-	 interval => 31
-     },
-     {
-	 name     => 'heise',
-	 url      => 'http://www.heise.de/newsticker/heise.rdf',
-	 interval => 23
-     },
+#     {
+#	 name     => '/.',
+#	 url      => 'http://www.slashdot.org/slashdot.rss',
+#	 interval => 11
+#     },
+#     {
+#	 name     => 'heise',
+#	 url      => 'http://www.heise.de/newsticker/heise.rdf',
+#	 interval => 11
+#     },
      # only locally retrievable, you won't get this
      {
 	 name     => 'psy',
 	 url      => 'http://www.mitch.h.shuttle.de/kosmosblog.xml',
-	 interval => 44
+	 interval => 100 + int(rand(100))
      },
      {
 	 name     => 'wiki',
 	 url      => 'http://www.mitch.h.shuttle.de/mediawiki/index.php?title=Spezial:Letzte_%C3%84nderungen&feed=atom',
-	 interval => 44
+	 interval => 20 + int(rand(20))
      },
      # my stuff
      {
 	 name     => 'cgarbs',
 	 url      => 'http://www.cgarbs.de/rssfeed.en.xml',
-	 interval => 61
+	 interval => 150 + int(rand(20))
      },
      {
 	 name     => 'mitch.c',
 	 url      => 'http://www.cgarbs.de/blog/feeds/comments.rss2',
-	 interval => 33
+	 interval => 30 + int(rand(20))
      },
      {
 	 name     => 'mitch',
 	 url      => 'http://www.cgarbs.de/blog/feeds/index.rss2',
-	 interval => 29
+	 interval => 50 + int(rand(20))
      },
      # real feeds
      {
+	 name     => 'BS',
+	 url      => 'http://beratersprech.de/feed/',
+	 interval => 77 + int(rand(33)),
+     },
+     {
 	 name     => 'polloi',
 	 url      => 'http://feed43.com/ahoipolloi.xml',
+	 interval => 50 + int(rand(20)),
+     },
+     {
+	 name     => 'devops',
+	 url      => 'http://devopsreactions.tumblr.com/rss',
 	 interval => 50 + int(rand(20)),
      },
      {
@@ -81,47 +91,52 @@ my @feedlist =
      {
 	 name     => 'fefe',
 	 url      => 'http://blog.fefe.de/rss.xml?html',
-	 interval => 50 + int(rand(20)),
+	 interval => 30 + int(rand(20)),
      },
      {
 	 name     => 'leckse',
 	 url      => 'https://ssl.animexx.de/weblog/415/rss/',
-	 interval => 50 + int(rand(20)),
+	 interval => 150 + int(rand(20)),
      },
      {
 	 name     => 'nonbiri',
 	 url      => 'http://ani.donmai.ch/?feed=rss2',
-	 interval => 50 + int(rand(20)),
+	 interval => 150 + int(rand(20)),
      },
      {
 	 name     => 'ipfreaks',
 	 url      => 'http://ipfreaks.de/feed/',
-	 interval => 50 + int(rand(20)),
+	 interval => 150 + int(rand(20)),
      },
      {
 	 name     => 'piratesoflove',
 	 url      => 'http://www.pirates-of-love.de/?feed=rss2',
-	 interval => 50 + int(rand(20)),
+	 interval => 150 + int(rand(20)),
      },
      {
 	 name     => 'mrehkopf',
 	 url      => 'http://mrehkopf.de/blog/?feed=rss2',
-	 interval => 50 + int(rand(20)),
+	 interval => 150 + int(rand(20)),
+     },
+     {
+	 name     => 'sd2snes',
+	 url      => 'http://sd2snes.de/blog/feed',
+	 interval => 150 + int(rand(30)),
      },
      {
 	 name     => 'lalufu',
 	 url      => 'http://www.skytale.net/blog/feeds/index.rss2',
-	 interval => 50 + int(rand(20)),
+	 interval => 150 + int(rand(30)),
      },
      {
 	 name     => 'niessu',
 	 url      => 'http://www.plouf.de/foto/index.php?/feeds/index.rss2',
-	 interval => 50 + int(rand(20)),
+	 interval => 150 + int(rand(30)),
      },
      {
 	 name     => 'ant',
 	 url      => 'http://blog.tomodachi.de/feeds/index.rss2',
-	 interval => 50 + int(rand(20)),
+	 interval => 150 + int(rand(30)),
      },
     );
 
