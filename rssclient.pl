@@ -84,6 +84,11 @@ my @feedlist =
 	 interval => 50 + int(rand(20)),
      },
      {
+	 name     => 'vongestern',
+	 url      => 'http://www.vongestern.com/feeds/posts/default',
+	 interval => 99 + int(rand(40)),
+     },
+     {
 	 name     => 'virt',
 	 url      => 'http://www.biglionmusic.com/feed/',
 	 interval => 50 + int(rand(20)),
