@@ -164,8 +164,9 @@ sub fetch_rss
     my $ua = LWP::UserAgent->new (env_proxy => 1, keep_alive => 1, timeout => 30);
     my $request = HTTP::Request->new('GET', $rss_url);
     my $response = $ua->request ($request);
-    return unless ($response->is_success);
+    return unless $response->is_success;
     my $data = $response->content;
+    return unless length $data > 0; # TODO: What is the minimum size of a valid RSS feed?
     my $rss = new XML::RSS ();
     $rss->parse($data);
     foreach my $item (@{$rss->{items}}) {
