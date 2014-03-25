@@ -99,6 +99,11 @@ my @feedlist =
 	 interval => 30 + int(rand(20)),
      },
      {
+	 name     => 'nudelmonster',
+	 url      => 'http://nudelmonster.blogspot.com/feeds/posts/default',
+	 interval => 99 + int(rand(40)),
+     },
+     {
 	 name     => 'leckse',
 	 url      => 'https://ssl.animexx.de/weblog/415/rss/',
 	 interval => 150 + int(rand(20)),
