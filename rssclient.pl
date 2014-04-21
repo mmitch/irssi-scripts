@@ -10,7 +10,11 @@ use Irssi;
 use LWP::UserAgent;
 use XML::RSS;
 
-$VERSION = '0.1';
+use threads;
+use threads::shared;
+use Thread::Queue;
+
+$VERSION = '0.2';
 %IRSSI   = (
     authors     => 'Christian Garbs',
     contact     => 'mitch@cgarbs.de',
@@ -18,28 +22,35 @@ $VERSION = '0.1';
     description => 'Follow RSS feeds in a separate window.',
     license => 'GNU GPL v3 or later',
     url     => 'https://github.com/mmitch/irssi-scripts',
-    changed => '2014-01-05',
+    changed => '2014-04-21',
 );
 
-my %settings =
+my %settings :shared =
     (
      window   => 'rssfeeds', # the irssi window name
-     interval => 12,         # check individual feed intervals every n minutes
+     interval => 3,          # check individual feed intervals every n minutes (feed fetcher thread)
+     poll     => 1,          # check feed fetcher every n minutes for new messages
+     backoff  => 120,        # pause for n minutes if feed gives no result (error in feed?)
+     sleep    => 2,          # feed fetcher thread unload check frequency (seconds)
+    );
+
+my @feedlist_TEST =
+    (
+     # for testing (high-volume feeds)
+     {
+	 name     => '/.',
+	 url      => 'http://www.slashdot.org/slashdot.rss',
+	 interval => 11
+     },
+     {
+	 name     => 'heise',
+	 url      => 'http://www.heise.de/newsticker/heise.rdf',
+	 interval => 11
+     },
     );
 
 my @feedlist =
     (
-     # for testing (high-volume feeds)
-#     {
-#	 name     => '/.',
-#	 url      => 'http://www.slashdot.org/slashdot.rss',
-#	 interval => 11
-#     },
-#     {
-#	 name     => 'heise',
-#	 url      => 'http://www.heise.de/newsticker/heise.rdf',
-#	 interval => 11
-#     },
      # only locally retrievable, you won't get this
      {
 	 name     => 'psy',
@@ -48,7 +59,7 @@ my @feedlist =
      },
      {
 	 name     => 'wiki',
-	 url      => 'http://www.mitch.h.shuttle.de/mediawiki/index.php?title=Spezial:Letzte_%C3%84nderungen&feed=atom',
+	 url      => 'http://www.mitch.h.shuttle.de/mediawiki/index.php?title=Spezial:Letzte_%C3%84nderungen&feed=rss',
 	 interval => 20 + int(rand(20))
      },
      # my stuff
@@ -139,6 +150,11 @@ my @feedlist =
 	 interval => 150 + int(rand(30)),
      },
      {
+	 name     => 'kioskforscher',
+	 url      => 'http://kioskforscher.wordpress.com/feed/',
+	 interval => 150 + int(rand(30)),
+     },
+     {
 	 name     => 'niessu',
 	 url      => 'http://www.plouf.de/foto/index.php?/feeds/index.rss2',
 	 interval => 150 + int(rand(30)),
@@ -151,6 +167,12 @@ my @feedlist =
     );
 
 my $poll_event = 0;
+
+my $feed_queue = Thread::Queue->new();
+
+my $stop_thread :shared = 0;
+
+my $thread;
 
 my @colors = qw
     (
@@ -221,17 +243,28 @@ sub print_intern
 
 sub print_error
 {
-    print_intern(Irssi::active_win(), MSGLEVEL_CLIENTERROR, @_);
+    print_intern Irssi::active_win(), MSGLEVEL_CLIENTERROR, @_;
+}
+
+sub print_error_thread
+{
+    print "rssclient_fetch: @_";
 }
 
 sub print_text
 {
-    print_intern(get_win(), MSGLEVEL_PUBLIC, @_);
+    print_intern get_win(), MSGLEVEL_PUBLIC, @_;
 }
 
 sub print_debug
 {
-#    print_intern(Irssi::window_find_name('(status)'), MSGLEVEL_CLIENTCRAP, @_);
+#    print_intern Irssi::window_find_name('(status)'), MSGLEVEL_CLIENTCRAP, @_;
+#    print @_;
+}
+
+sub print_debug_thread
+{
+#    print @_;
 }
 
 sub poll_feed
@@ -243,7 +276,7 @@ sub poll_feed
     my $now = time();
     if ($now - $lastpoll > $feed->{interval} * 60)
     {
-	print_debug "Checking RSS feed $feed->{name} [$feed->{url}]...";
+	print_debug_thread "Checking RSS feed $feed->{name} [$feed->{url}]...";
 	my @new_items = fetch_rss( $feed->{url} );
 	if (@new_items)
 	{
@@ -251,32 +284,88 @@ sub poll_feed
 	    my @delta = delta_rss (\@old_items, \@new_items);
 	    foreach my $item (reverse @delta)
 	    {
-		print_text(
-		    $feed->{color} . $feed->{name} . '%n ' .
-		    '%_' . $item->{title}. '%_ ' .
-		    $item->{link}
+		$feed_queue->enqueue(
+		    {
+			'color'    => $feed->{color},
+			'feedname' => $feed->{name},
+			'title'    => $item->{title},
+			'link'     => $item->{link}
+		    }
 		    );
 	    }
 	    $feed->{items} = \@new_items;
 	    $feed->{lastpoll} = $now;
 	}
+	else
+	{
+	    print_error_thread "no feed items in $feed->{name} [$feed->{url}]";
+	    $feed->{lastpoll} = $now + $settings{backoff} * 60;
+	}
     }
+}
+
+sub thread_server
+{
+    print_debug_thread 'START thread_server()';
+    while (! $stop_thread)
+    {
+	print_debug_thread 'thread server main loop instance GO!';
+	foreach my $feed (@feedlist)
+	{
+	    threads->yield();
+	    poll_feed($feed);
+	}
+	print_debug_thread 'thread server main loop instance finished... now sleeping';
+
+	my $waituntil = time() + $settings{interval} * 60;
+
+	do
+	{
+	    threads->yield;
+	    sleep $settings{sleep};
+	}
+	until (time() >= $waituntil or $stop_thread)
+    }
+    print_error_thread 'rssclient thread stopped';
+    print_debug_thread 'END thread_server()';
 }
 
 sub callback
 {
-    foreach my $feed (@feedlist)
+    print_debug 'START callback()';
+    while (defined (my $item = $feed_queue->dequeue_nb()))
     {
-	poll_feed($feed);
+	print_text(
+	    $item->{color} . $item->{feedname} . '%n ' .
+	    '%_' . $item->{title}. '%_ ' .
+	    $item->{link}
+	    );
     }
+    print_debug 'END callback()';
 }
 
 sub register_poll_event
 {
+    print_debug 'START register_poll_event()';
     Irssi::timeout_remove($poll_event) if $poll_event;
-    Irssi::timeout_add($settings{interval}*1000*60, \&callback, [1] );
+    Irssi::timeout_add($settings{poll}*1000*60, \&callback, [1] );
+    print_debug 'END register_poll_event()';
 }
 
+# stop feed thread on unload
+sub UNLOAD
+{
+    print_debug 'START UNLOAD()';
+    $stop_thread = 1;
+    if (defined $thread)
+    {
+	$thread->join();
+	$thread = undef;
+    }
+    print_debug 'END UNLOAD()';
+}
+
+# debug/helper method to print all color codes
 sub rainbow_bar
 {
     my $colortext = '';
@@ -286,7 +375,7 @@ sub rainbow_bar
 	$escaped =~ s/%/%%/g;
 	$colortext .= "$color$escaped%n ";
     }
-    print_text( $colortext );
+    print_text $colortext;
 }
 
 
@@ -305,7 +394,8 @@ foreach my $feed (@feedlist)
 if ( get_win() )
 {
     register_poll_event();
-    print_text( "$IRSSI{name} initialized: poll interval = $settings{interval}m" );
+    $thread = threads->create(\&thread_server);
+    print_text "$IRSSI{name} initialized: feel poll interval = $settings{interval}m, thread poll interval = $settings{poll}m, unload check = $settings{sleep}s";
 
     # just for color debugging
     # rainbow_bar();
@@ -314,6 +404,6 @@ if ( get_win() )
 }
 else
 {
-    print_error( "Create a window named `$settings{window}'.  Then, reload $IRSSI{name}." );
-    print_error( "Hint: /window new hide ; /window name $settings{window} ; /script load $IRSSI{name}" );
+    print_error "Create a window named `$settings{window}'.  Then, reload $IRSSI{name}.";
+    print_error "Hint: /window new hide ; /window name $settings{window} ; /script load $IRSSI{name}";
 }
