@@ -307,6 +307,9 @@ sub poll_feed
 sub thread_server
 {
     print_debug_thread 'START thread_server()';
+
+    close STDIN;
+
     while (! $stop_thread)
     {
 	print_debug_thread 'thread server main loop instance GO!';
