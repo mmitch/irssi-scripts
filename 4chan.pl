@@ -103,12 +103,18 @@ sub write_debug($$) {
     }
 }
 
+sub color_filename($) {
+    my $filename = shift;
+    $filename =~ s/%/%%/g; # protect real %
+    return "%y${filename}%n"; # use yellow, revert to normal afterwards
+}
+
 sub diskfree($) {
     # poor man's df
     # if you want it portable, use Filesys::Statvfs
     my $dir = shift;
     my $size;
-
+    
     open DF, "df -P $dir|" or warn "can't open df: $!";
     my $line = <DF>; # skip header
 
@@ -176,25 +182,25 @@ sub download_it($$$$$$$$$$$) {
     # prepare download directory
     my $downdir = Irssi::settings_get_str('4chan_downdir');
     unless (-e $downdir) {
-	write_verbose($witem, "%R>>%n 4chan_downdir does not exist yet, trying to create it");
+	write_verbose($witem, "%R>>%n 4chan_downdir ".color_filename($downdir)." does not exist yet, trying to create it");
 	make_path($downdir);
     }
     
     # do some checks
     unless (-e $downdir) {
-	write_irssi($witem, "%R>>%n 4chan_downdir does not exist!");
+	write_irssi($witem, "%R>>%n 4chan_downdir ".color_filename($downdir)." does not exist!");
 	return;
     }
     unless (-d $downdir) {
-	write_irssi($witem, "%R>>%n 4chan_downdir exists but is no directory!");
+	write_irssi($witem, "%R>>%n 4chan_downdir ".color_filename($downdir)." exists but is no directory!");
 	return;
     }
     unless (-w $downdir) {
-	write_irssi($witem, "%R>>%n 4chan_downdir is not writeable!");
+	write_irssi($witem, "%R>>%n 4chan_downdir ".color_filename($downdir)." is not writeable!");
 	return;
     }
     if (diskfree($downdir) < Irssi::settings_get_int('4chan_freespace')) {
-	write_irssi($witem, "%R>>%n 4chan_downdir has not enough free space left!");
+	write_irssi($witem, "%R>>%n 4chan_downdir ".color_filename($downdir)." has not enough free space left!");
 	return;
     }
     
@@ -537,9 +543,9 @@ sub cmd_save {
 	$io->print("FREESPACE\t" . Irssi::settings_get_int( '4chan_freespace') . "\n");
 	$io->print("VERBOSE\t"   . Irssi::settings_get_bool('4chan_verbose')   . "\n");
 	$io->close;
- 	Irssi::print("4chan configuration saved to ".$filename);
+ 	Irssi::print("4chan configuration saved to ".color_filename($filename));
     } else {
-	Irssi::print("could not write 4chan configuration to ".$filename.": $!");
+	Irssi::print("could not write 4chan configuration to ".color_filename($filename).": $!");
     }
     
 }
@@ -571,9 +577,9 @@ sub cmd_load {
 		  }
 	    }
 	}
-	Irssi::print("4chan configuration loaded from ".$filename);
+	Irssi::print("4chan configuration loaded from ".color_filename($filename));
     } else {
-	Irssi::print("could not load 4chan configuration from ".$filename.": $!");
+	Irssi::print("could not load 4chan configuration from ".color_filename($filename).": $!");
     }
 }
 
