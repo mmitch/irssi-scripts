@@ -10,6 +10,7 @@
 use strict;
 use Irssi 20020324 qw (command_bind command_runsub signal_add_first signal_add_last);
 use File::Temp qw(tempfile);
+use File::Path qw(make_path);
 use IO::File;
 use vars qw($VERSION %IRSSI);
 use POSIX qw(strftime);
@@ -171,9 +172,15 @@ sub download_it($$$$$$$$$$$) {
 	    $context->command($text);
 	}
     }
+
+    # prepare download directory
+    my $downdir = Irssi::settings_get_str('4chan_downdir');
+    unless (-e $downdir) {
+	write_verbose($witem, "%R>>%n 4chan_downdir does not exist yet, trying to create it");
+	make_path($downdir);
+    }
     
     # do some checks
-    my $downdir = Irssi::settings_get_str('4chan_downdir');
     unless (-e $downdir) {
 	write_irssi($witem, "%R>>%n 4chan_downdir does not exist!");
 	return;
