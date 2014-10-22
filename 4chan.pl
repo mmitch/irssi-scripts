@@ -64,19 +64,19 @@ my %spree_text = (
    );
 
 # "message public", SERVER_REC, char *msg, char *nick, char *address, char *target
-signal_add_last("message public" => sub {check_for_link(\@_,1,4,2,0);});
+signal_add_last('message public' => sub {check_for_link(\@_,1,4,2,0);});
 # "message own_public", SERVER_REC, char *msg, char *target
-signal_add_last("message own_public" => sub {check_for_link(\@_,1,2,-1,0);});
+signal_add_last('message own_public' => sub {check_for_link(\@_,1,2,-1,0);});
 
 # "message private", SERVER_REC, char *msg, char *nick, char *address
-signal_add_last("message private" => sub {check_for_link(\@_,1,-1,2,0);});
+signal_add_last('message private' => sub {check_for_link(\@_,1,-1,2,0);});
 # "message own_private", SERVER_REC, char *msg, char *target, char *orig_target
-signal_add_last("message own_private" => sub {check_for_link(\@_,1,2,-1,0);});
+signal_add_last('message own_private' => sub {check_for_link(\@_,1,2,-1,0);});
 
 # "message irc action", SERVER_REC, char *msg, char *nick, char *address, char *target
-signal_add_last("message irc action" => sub {check_for_link(\@_,1,4,2,0);});
+signal_add_last('message irc action' => sub {check_for_link(\@_,1,4,2,0);});
 # "message irc own_action", SERVER_REC, char *msg, char *target
-signal_add_last("message irc own_action" => sub {check_for_link(\@_,1,2,-1,0);});
+signal_add_last('message irc own_action' => sub {check_for_link(\@_,1,2,-1,0);});
 
 
 sub write_irssi($$) {
@@ -142,7 +142,7 @@ sub download_it($$$$$$$$$$$) {
     write_debug($witem, '$downurl='.$downurl);
     write_debug($witem, '$referrer='.$referrer);
 
-    my $now = strftime "%d.%m.%Y %H:%M:%S", localtime;
+    my $now = strftime '%d.%m.%Y %H:%M:%S', localtime;
     $file =~ s/%/%25/g;
 	
     my $channel = ($paramchannel == -1) ? '-private-' : $signal->[$paramchannel];
@@ -182,25 +182,25 @@ sub download_it($$$$$$$$$$$) {
     # prepare download directory
     my $downdir = strftime Irssi::settings_get_str('4chan_downdir'), localtime;
     unless (-e $downdir) {
-	write_verbose($witem, "%R>>%n 4chan_downdir ".color_filename($downdir)." does not exist yet, trying to create it");
+	write_verbose($witem, '%R>>%n 4chan_downdir '.color_filename($downdir).' does not exist yet, trying to create it');
 	make_path($downdir);
     }
     
     # do some checks
     unless (-e $downdir) {
-	write_irssi($witem, "%R>>%n 4chan_downdir ".color_filename($downdir)." does not exist!");
+	write_irssi($witem, '%R>>%n 4chan_downdir '.color_filename($downdir).' does not exist!');
 	return;
     }
     unless (-d $downdir) {
-	write_irssi($witem, "%R>>%n 4chan_downdir ".color_filename($downdir)." exists but is no directory!");
+	write_irssi($witem, '%R>>%n 4chan_downdir '.color_filename($downdir).' exists but is no directory!');
 	return;
     }
     unless (-w $downdir) {
-	write_irssi($witem, "%R>>%n 4chan_downdir ".color_filename($downdir)." is not writeable!");
+	write_irssi($witem, '%R>>%n 4chan_downdir '.color_filename($downdir).' is not writeable!');
 	return;
     }
     if (diskfree($downdir) < Irssi::settings_get_int('4chan_freespace')) {
-	write_irssi($witem, "%R>>%n 4chan_downdir ".color_filename($downdir)." has not enough free space left!");
+	write_irssi($witem, '%R>>%n 4chan_downdir '.color_filename($downdir).' has not enough free space left!');
 	return;
     }
     
@@ -221,7 +221,7 @@ sub download_it($$$$$$$$$$$) {
 	my (undef, $tmpfile) = tempfile('4chan.tmp.XXXXXXXXXXXX', DIR => $downdir);
 	$downurl = $url unless ($downurl);
 	system("( wget -U \"$USERAGENT\" $referrer -qO \"$tmpfile\" \"$downurl\" && mv \"$tmpfile\" \"$filename\" && chmod =rw \"$filename\" || rm -f \"$tmpfile\" ) &");
-	write_verbose($witem, "%R>>%n Saving 4chan link");
+	write_verbose($witem, '%R>>%n Saving 4chan link');
     }
 }
 
@@ -528,7 +528,7 @@ sub check_for_link {
     }
 
     if ($count > $maxcount) {
-	write_irssi($witem, "%R>>%n endless loop in 4chan.pl!");
+	write_irssi($witem, '%R>>%n endless loop in 4chan.pl!');
     }
 
 }
@@ -543,9 +543,9 @@ sub cmd_save {
 	$io->print("FREESPACE\t" . Irssi::settings_get_int( '4chan_freespace') . "\n");
 	$io->print("VERBOSE\t"   . Irssi::settings_get_bool('4chan_verbose')   . "\n");
 	$io->close;
- 	Irssi::print("4chan configuration saved to ".color_filename($filename));
+ 	Irssi::print('4chan configuration saved to '.color_filename($filename));
     } else {
-	Irssi::print("could not write 4chan configuration to ".color_filename($filename).": $!");
+	Irssi::print('could not write 4chan configuration to '.color_filename($filename).": $!");
     }
     
 }
@@ -577,9 +577,9 @@ sub cmd_load {
 		  }
 	    }
 	}
-	Irssi::print("4chan configuration loaded from ".color_filename($filename));
+	Irssi::print('4chan configuration loaded from '.color_filename($filename));
     } else {
-	Irssi::print("could not load 4chan configuration from ".color_filename($filename).": $!");
+	Irssi::print('could not load 4chan configuration from '.color_filename($filename).": $!");
     }
 }
 
@@ -604,7 +604,7 @@ Irssi::signal_add_first('command script unload', 'sig_command_script_unload');
 Irssi::signal_add('setup saved', 'cmd_save');
 
 Irssi::settings_add_bool($IRSSI{'name'}, '4chan_announce',  0);
-Irssi::settings_add_str( $IRSSI{'name'}, '4chan_conffile',  Irssi::get_irssi_dir()."/4chan.cf");
+Irssi::settings_add_str( $IRSSI{'name'}, '4chan_conffile',  Irssi::get_irssi_dir().'/4chan.cf');
 Irssi::settings_add_str( $IRSSI{'name'}, '4chan_downdir',   "$ENV{HOME}/4chan");
 Irssi::settings_add_int( $IRSSI{'name'}, '4chan_freespace', 100 * 1024);
 Irssi::settings_add_bool($IRSSI{'name'}, '4chan_verbose',   1);
