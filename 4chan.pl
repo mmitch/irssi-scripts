@@ -248,13 +248,11 @@ sub check_for_link {
     my ($maxcount, $count) = (32, 0);
     
 
-    while ($message =~ m|(https?://[a-z]+\.4chan[a-z]*\.org/([a-z0-9]+)/src(?:\.cgi)?/(?:cb-nws/)?(\S+\.[a-z]+))|g) {
+    while ($message =~ m|(https?://[a-z]+\.4cdn\.org/([a-z0-9]+)/(\S+\.[a-z]+))|g) {
 	$chan = '4chan';
 	$url = $1;
 	$board = $2;
 	$file = $3;
-	$url =~ s|/src.cgi/|/src/|;
-	$url =~ s|/src/cb-news/|/src/|;
 
 	download_it($chan, $board, $file, $url, '', '',
 		    $witem, $paramchannel, $paramnick, $signal, $server);
