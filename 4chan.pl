@@ -1,6 +1,6 @@
 # autodownload 4chan (and similar) links before they disappear
 #
-# Copyright (C) 2006-2013  Christian Garbs <mitch@cgarbs.de>
+# Copyright (C) 2006-2014  Christian Garbs <mitch@cgarbs.de>
 # licensed under GNU GPL v2
 #
 # needs wget and the LWP modules
@@ -18,7 +18,7 @@ use POSIX qw(strftime);
 use LWP::UserAgent;
 use HTTP::Cookies;
 
-$VERSION = '2013-01-21';
+$VERSION = '2014-10-22';
 %IRSSI = (
 	authors  	=> 'Christian Garbs',
 	contact  	=> 'mitch@cgarbs.de',
@@ -180,7 +180,7 @@ sub download_it($$$$$$$$$$$) {
     }
 
     # prepare download directory
-    my $downdir = Irssi::settings_get_str('4chan_downdir');
+    my $downdir = strftime Irssi::settings_get_str('4chan_downdir'), localtime;
     unless (-e $downdir) {
 	write_verbose($witem, "%R>>%n 4chan_downdir ".color_filename($downdir)." does not exist yet, trying to create it");
 	make_path($downdir);
