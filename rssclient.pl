@@ -36,7 +36,9 @@ my %settings :shared =
 
 my @feedlist_TEST =
     (
+
      # for testing (high-volume feeds)
+     
      {
 	 name     => '/.',
 	 url      => 'http://www.slashdot.org/slashdot.rss',
@@ -54,12 +56,12 @@ my @feedlist =
      # only locally retrievable, you won't get this
      {
 	 name     => 'psy',
-	 url      => 'http://www.mitch.h.shuttle.de/kosmosblog.xml',
+	 url      => 'http://www.dn.cgarbs.de/kosmosblog.xml',
 	 interval => 100 + int(rand(100))
      },
      {
 	 name     => 'wiki',
-	 url      => 'http://www.mitch.h.shuttle.de/mediawiki/index.php?title=Spezial:Letzte_%C3%84nderungen&feed=rss',
+	 url      => 'http://www.dn.cgarbs.de/mediawiki/index.php?title=Spezial:Letzte_%C3%84nderungen&feed=rss',
 	 interval => 20 + int(rand(20))
      },
      # my stuff
