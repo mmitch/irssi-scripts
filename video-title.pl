@@ -57,7 +57,7 @@ sub write_error($$) {
 
 sub write_title($$) {
     my ($witem, $title) = @_;
-    my $formatted = '%m' . $title . '%n'; # or try %K instead of %m
+    my $formatted = '%K' . $title . '%n'; # or try %m instead of %K
     write_irssi($witem, $formatted);
 }
 
@@ -78,7 +78,7 @@ sub check_for_link {
     # scan for URLs
     my ($maxcount, $count) = (32, 0);
 
-    while ($message =~ m,(https?://[^/]*youtube\..*/[^ ]+),gi) {
+    while ($message =~ m,(https?://[^/]*(youtube\..*|youtu.be)/[^ ]+),gi) {
 	my $url = $1;
 
 	# sanitize URL
