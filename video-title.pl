@@ -19,7 +19,7 @@ $VERSION = '2020-06-05';
 	name    	=> 'video-title',
 	description 	=> 'show video title above video links ',
 	license 	=> 'GPLv2+',
-	url     	=> 'http://github.com/mmitch/NONE-YET/',
+	url     	=> 'http://github.com/mmitch/irssi-scripts/',
 	changed  	=> $VERSION,
 );
 
