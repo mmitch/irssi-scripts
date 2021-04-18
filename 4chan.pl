@@ -11,6 +11,7 @@ use strict;
 use Irssi 20020324 qw (command_bind command_runsub signal_add_first signal_add_last);
 use File::Temp qw(tempfile);
 use File::Path qw(make_path);
+use File::Basename;
 use IO::File;
 use vars qw($VERSION %IRSSI);
 use POSIX qw(strftime);
@@ -523,6 +524,38 @@ sub check_for_link {
 	download_it($chan, $board, $file, $url, $downurl, $referrer,
 		    $witem, $paramchannel, $paramnick, $signal, $server);
 	last if ++$count > $maxcount;
+    }
+
+    while ($message =~ m,(((https?:)//(?:[^/]+\.)?pr0gramm.com)(?:/.*)/(\d+)),gi) {
+
+	$chan = 'pr0gramm.com';
+	$url = $1;
+	$board = '-';
+
+	my ($host, $protocol, $id) = ($2, $3, $4);
+
+	# map to static url
+	my $staticurl = "$host/static/$id";
+
+	# get piclink from static page
+	my @commandline = ('GET', $staticurl);
+	open (my $fh, '-|', @commandline) or write_error($witem, "error running \"@commandline\": $!"), next;
+	my $piclink = $protocol;
+	while (my $line = <$fh>) {
+	    if ($line =~ /<(?:img|video) src="([^"]+)"/) {
+		$piclink .= $1;
+		last;
+	    }
+	}
+	close $fh;
+
+	next if ($piclink eq $protocol);
+
+	$downurl = $piclink;
+	$file = 'pr0_'.basename($downurl);
+
+	download_it($chan, $board, $file, $url, $downurl, $staticurl,
+		    $witem, $paramchannel, $paramnick, $signal, $server);
     }
 
     if ($count > $maxcount) {
