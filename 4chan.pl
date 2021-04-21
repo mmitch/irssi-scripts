@@ -526,13 +526,13 @@ sub check_for_link {
 	last if ++$count > $maxcount;
     }
 
-    while ($message =~ m,(((https?:)//(?:[^/]+\.)?pr0gramm.com)(?:/.*)/(\d+)),gi) {
+    while ($message =~ m,(((https?:)//(?:[^/]+\.)?pr0gramm.com)/([^/]+)/(\d+)),gi) {
 
 	$chan = 'pr0gramm.com';
 	$url = $1;
-	$board = '-';
+	$board = $4;
 
-	my ($host, $protocol, $id) = ($2, $3, $4);
+	my ($host, $protocol, $id) = ($2, $3, $5);
 
 	# map to static url
 	my $staticurl = "$host/static/$id";
