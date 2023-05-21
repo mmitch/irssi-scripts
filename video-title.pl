@@ -12,7 +12,7 @@ use Irssi 20020324 qw (signal_add_first signal_add_last);
 use IO::File;
 use vars qw($VERSION %IRSSI);
 
-$VERSION = '2020-06-05';
+$VERSION = '2023-05-21';
 %IRSSI = (
 	authors  	=> 'Christian Garbs',
 	contact  	=> 'mitch@cgarbs.de',
@@ -84,7 +84,16 @@ sub check_for_link {
 	# sanitize URL
 	$url =~ s/(["'<>()])/ sprintf "%%%0x", ord $1 /eg;
 
-	my @commandline = ('/home/mitch/bin/youtube-dl', '--retries', '1', '--get-title', $url);
+	my @commandline = (
+	    '/home/mitch/bin/youtube-dl',
+	    '--flat-playlist',
+	    '--skip-playlist-after-errors', '1',
+	    '--playlist-items', '1:1',
+	    '--no-playlist',
+	    '--retries', '1',
+	    '--get-title',
+	    $url
+	    );
 	
 	# get title
 	open (my $fh, '-|', @commandline) or write_error($witem, "error running \"@commandline\": $!"), next;
